@@ -5,10 +5,10 @@
 
 typedef struct{
 	uint32_t mask[STATE_SIZE];
-    int words[MAX_BITS_IN_LIST_OF_BITS];
-    int bits[MAX_BITS_IN_LIST_OF_BITS];
-    int subround;
-    int number_of_bits;
+	int words[MAX_BITS_IN_LIST_OF_BITS];
+	int bits[MAX_BITS_IN_LIST_OF_BITS];
+	int subround;
+	int number_of_bits;
 } list_of_bits_t;
 
 typedef list_of_bits_t difference_t;
@@ -16,17 +16,17 @@ typedef list_of_bits_t linear_mask_t;
 
 typedef struct{
 	char paper[40];
-    double expected;
+	double expected;
 	double observed;
-    uint64_t correlation_count;
-    uint64_t number_of_trials;
-    uint8_t is_significant;
+	uint64_t correlation_count;
+	uint64_t number_of_trials;
+	uint8_t is_significant;
 } correlation_t;
 
 typedef struct{
 	int alg_type;
-    list_of_bits_t input;
-    list_of_bits_t output;
+	list_of_bits_t input;
+	list_of_bits_t output;
 	correlation_t correlation;
 } diff_lin_t;
 
@@ -34,17 +34,17 @@ typedef diff_lin_t differential_t;
 typedef diff_lin_t linear_approximation_t;
 
 typedef struct{
-    int alg_type;
-    int subrounds;
-    differential_t diff;
-    linear_approximation_t la;
-    correlation_t correlation_of_g;
+	int alg_type;
+	int subrounds;
+	differential_t diff;
+	linear_approximation_t la;
+	correlation_t correlation_of_g;
 	double threshold;
 	double neutrality_measure[KEY_SIZE_IN_BITS];
 	int pnb[KEY_SIZE_IN_BITS];
 	int number_of_pnb;
-    double time_complexity;
-    double data_complexity;
+	double time_complexity;
+	double data_complexity;
 } pnb_t;
 
 void lob_compute_mask_from_list_of_bits(list_of_bits_t *lob);

@@ -20,12 +20,12 @@ __host__ __device__ void chacha_invert_subrounds(uint32_t state[STATE_SIZE], uin
  __host__ __device__ void chacha_encrypt_rounds(uint32_t output[STATE_SIZE], uint32_t input[STATE_SIZE], uint32_t rounds);
 
  __host__ __device__ void chacha_decrypt_rounds(uint32_t output[STATE_SIZE], uint32_t input[STATE_SIZE], 
-    uint32_t intermediate[STATE_SIZE], uint32_t rounds, uint32_t last_round);
+	uint32_t intermediate[STATE_SIZE], uint32_t rounds, uint32_t last_round);
 
  __host__ __device__ void chacha_encrypt_subrounds(uint32_t output[STATE_SIZE], uint32_t input[STATE_SIZE], uint32_t subrounds);
 
  __host__ __device__ void chacha_decrypt_subrounds(uint32_t output[STATE_SIZE], uint32_t input[STATE_SIZE], 
-    uint32_t intermediate[STATE_SIZE], uint32_t subrounds, uint32_t last_subround);
+	uint32_t intermediate[STATE_SIZE], uint32_t subrounds, uint32_t last_subround);
 
  __host__ __device__ void chacha_expand_bit(linear_approximation_t *L, int w, int bit, int expansion_type);
 

@@ -56,33 +56,33 @@ __host__ __device__ void forro_init(uint32_t state[STATE_SIZE], uint32_t k[KEY_S
 __host__ __device__ void forro_odd_round(uint32_t x[STATE_SIZE])
 {
 	QUARTERROUND(x[0], x[4], x[8], x[12], x[3])
-    QUARTERROUND(x[1], x[5], x[9], x[13], x[0])
-    QUARTERROUND(x[2], x[6], x[10], x[14], x[1])
-    QUARTERROUND(x[3], x[7], x[11], x[15], x[2])
+	QUARTERROUND(x[1], x[5], x[9], x[13], x[0])
+	QUARTERROUND(x[2], x[6], x[10], x[14], x[1])
+	QUARTERROUND(x[3], x[7], x[11], x[15], x[2])
 }
 
 __host__ __device__ void forro_even_round(uint32_t x[STATE_SIZE])
 {
 	QUARTERROUND(x[0], x[5], x[10], x[15], x[3])
-    QUARTERROUND(x[1], x[6], x[11], x[12], x[0])
-    QUARTERROUND(x[2], x[7], x[8], x[13], x[1])
-    QUARTERROUND(x[3], x[4], x[9], x[14], x[2])
+	QUARTERROUND(x[1], x[6], x[11], x[12], x[0])
+	QUARTERROUND(x[2], x[7], x[8], x[13], x[1])
+	QUARTERROUND(x[3], x[4], x[9], x[14], x[2])
 }
 
 __host__ __device__ void forro_invert_odd_round(uint32_t x[STATE_SIZE])
 {
 	INVERT_QUARTERROUND(x[3], x[7], x[11], x[15], x[2])
-    INVERT_QUARTERROUND(x[2], x[6], x[10], x[14], x[1])
-    INVERT_QUARTERROUND(x[1], x[5], x[9], x[13], x[0])
-    INVERT_QUARTERROUND(x[0], x[4], x[8], x[12], x[3])
+	INVERT_QUARTERROUND(x[2], x[6], x[10], x[14], x[1])
+	INVERT_QUARTERROUND(x[1], x[5], x[9], x[13], x[0])
+	INVERT_QUARTERROUND(x[0], x[4], x[8], x[12], x[3])
 }
 
 __host__ __device__ void forro_invert_even_round(uint32_t x[STATE_SIZE])
 {
 	INVERT_QUARTERROUND(x[3], x[4], x[9], x[14], x[2])
-    INVERT_QUARTERROUND(x[2], x[7], x[8], x[13], x[1])
-    INVERT_QUARTERROUND(x[1], x[6], x[11], x[12], x[0])
-    INVERT_QUARTERROUND(x[0], x[5], x[10], x[15], x[3])
+	INVERT_QUARTERROUND(x[2], x[7], x[8], x[13], x[1])
+	INVERT_QUARTERROUND(x[1], x[6], x[11], x[12], x[0])
+	INVERT_QUARTERROUND(x[0], x[5], x[10], x[15], x[3])
 }
 
 __host__ __device__ void forro_rounds(uint32_t state[STATE_SIZE], uint32_t rounds, uint32_t last_round)
@@ -295,97 +295,97 @@ __host__ __device__ void forro_decrypt_subrounds(uint32_t final_state[STATE_SIZE
 
 __host__ __device__ void forro_words_of_subround(int W[5], int subround)
 {
-    uint32_t pattern[8][5] = {
-        {0,4,8,12,3},
-        {1,5,9,13,0},
-        {2,6,10,14,1},
-        {3,7,11,15,2},
-        {0,5,10,15,3},
-        {1,6,11,12,0},
-        {2,7,8,13,1},
-        {3,4,9,14,2}
-    };
-    
-    memcpy(W, pattern[(subround-1)%8], 5*sizeof(int));
+	uint32_t pattern[8][5] = {
+		{0,4,8,12,3},
+		{1,5,9,13,0},
+		{2,6,10,14,1},
+		{3,7,11,15,2},
+		{0,5,10,15,3},
+		{1,6,11,12,0},
+		{2,7,8,13,1},
+		{3,4,9,14,2}
+	};
+	
+	memcpy(W, pattern[(subround-1)%8], 5*sizeof(int));
 }
 
 __host__ __device__ int forro_get_letter(int w, int subround)
 {
-    int W[5];
-    
-    forro_words_of_subround(W, subround);
-    
-    for(int i=0;i<5;i++)
-        if(w == W[i])
-            return i;
-    
-    return -1;
+	int W[5];
+	
+	forro_words_of_subround(W, subround);
+	
+	for(int i=0;i<5;i++)
+		if(w == W[i])
+			return i;
+	
+	return -1;
 }
 
 __host__ __device__ void forro_get_expansion(expansion e[5], int subround)
 {
-    int W[5];
-    
-    forro_words_of_subround(W, subround);
-    expansion exp[5] = {
-        {
-            {W[LetterA], W[LetterC], W[LetterC]},
-            {8,0,31}, 3, 2, {0}
-        },
-        {
-            {W[LetterB], W[LetterC], W[LetterC], W[LetterD], W[LetterC], W[LetterD]},
-            {10, 10,0, 0, 31, 31}, 6, 4, {0}
-        },
-        {
-            {W[LetterC], W[LetterD], W[LetterD], W[LetterE], W[LetterD], W[LetterE]},
-            {0,0,27,0,31,31}, 6, 4, {0}
-        },
-        {
-            {W[LetterD], W[LetterA], W[LetterB], W[LetterA], W[LetterB]},
-            {27,8,0,7,31}, 5, 3, {0}
-        },
-        {
-            {W[LetterE], W[LetterA], W[LetterB], W[LetterB]},
-            {0,8,0,31}, 4, 3, { {SPECIAL_EXPANSION_EDD, 3} }
-        }
-    };
-    
-    memcpy(e, exp, sizeof(expansion)*5);
+	int W[5];
+	
+	forro_words_of_subround(W, subround);
+	expansion exp[5] = {
+		{
+			{W[LetterA], W[LetterC], W[LetterC]},
+			{8,0,31}, 3, 2, {0}
+		},
+		{
+			{W[LetterB], W[LetterC], W[LetterC], W[LetterD], W[LetterC], W[LetterD]},
+			{10, 10,0, 0, 31, 31}, 6, 4, {0}
+		},
+		{
+			{W[LetterC], W[LetterD], W[LetterD], W[LetterE], W[LetterD], W[LetterE]},
+			{0,0,27,0,31,31}, 6, 4, {0}
+		},
+		{
+			{W[LetterD], W[LetterA], W[LetterB], W[LetterA], W[LetterB]},
+			{27,8,0,7,31}, 5, 3, {0}
+		},
+		{
+			{W[LetterE], W[LetterA], W[LetterB], W[LetterB]},
+			{0,8,0,31}, 4, 3, { {SPECIAL_EXPANSION_EDD, 3} }
+		}
+	};
+	
+	memcpy(e, exp, sizeof(expansion)*5);
 }
 
 __host__ __device__ void forro_expand_bit(linear_approximation_t *L, int w, int bit, int expansionType)
 {
-    expansion exp[5];
-    int subround = L->input.subround + 1, size, letter;
+	expansion exp[5];
+	int subround = L->input.subround + 1, size, letter;
 
-    forro_get_expansion(exp, subround);
-    letter = forro_get_letter(w, subround);
-    if(expansionType == EXPANSION_LINEAR)
-        size = exp[letter].number_of_linear_terms;
-    else
-        size = exp[letter].number_of_terms;
-    
-    for (int j = 0; j < size; j++)
-        exp[letter].list_of_bits[j] = (exp[letter].list_of_bits[j] + 32 + bit) % 32;
-    set_list_of_bits(L->output.mask, exp[letter].list_of_words, exp[letter].list_of_bits, size);
+	forro_get_expansion(exp, subround);
+	letter = forro_get_letter(w, subround);
+	if(expansionType == EXPANSION_LINEAR)
+		size = exp[letter].number_of_linear_terms;
+	else
+		size = exp[letter].number_of_terms;
+	
+	for (int j = 0; j < size; j++)
+		exp[letter].list_of_bits[j] = (exp[letter].list_of_bits[j] + 32 + bit) % 32;
+	set_list_of_bits(L->output.mask, exp[letter].list_of_words, exp[letter].list_of_bits, size);
 }
 
 
 __host__ __device__  void forro_special_cases(linear_approximation_t *L, int bit, int expansionType)
 {
-    expansion exp[5];
-    int subround = L->input.subround + 1;
-    forro_get_expansion(exp, subround);
-    
-    for(int i=0; i<5; i++)
-    {
-        for(int s=0; s<NUMBER_OF_SPECIAL_CASES; s++)
-        {
-            if(exp[i].special_cases_bits[s][0] == expansionType)
-            {
-                int position = exp[i].special_cases_bits[s][1];
-                set_bit(L->output.mask, exp[i].list_of_words[position], (exp[i].list_of_bits[position] + 32 + bit) % 32);
-            }
-        }
-    }
+	expansion exp[5];
+	int subround = L->input.subround + 1;
+	forro_get_expansion(exp, subround);
+	
+	for(int i=0; i<5; i++)
+	{
+		for(int s=0; s<NUMBER_OF_SPECIAL_CASES; s++)
+		{
+			if(exp[i].special_cases_bits[s][0] == expansionType)
+			{
+				int position = exp[i].special_cases_bits[s][1];
+				set_bit(L->output.mask, exp[i].list_of_words[position], (exp[i].list_of_bits[position] + 32 + bit) % 32);
+			}
+		}
+	}
 }
