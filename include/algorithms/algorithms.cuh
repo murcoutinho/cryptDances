@@ -24,25 +24,25 @@
 #define U8TO32_LITTLE(p) (((uint32_t *) (p))[0])
 
 typedef struct {
-	int alg_type;
-	uint32_t key_positions[8];
-	uint32_t iv_positions[4];
-	int number_of_rounds;
-	int number_of_subrounds_in_one_round;
-	void(*init)(uint32_t *, uint32_t *, uint32_t *, uint32_t *);
-	void(*rounds)(uint32_t *, uint32_t, uint32_t);
-	void(*subrounds)(uint32_t *, uint32_t, uint32_t);
-	void(*invert_rounds)(uint32_t *, uint32_t, uint32_t);
-	void(*invert_subrounds)(uint32_t *, uint32_t, uint32_t);
-	void(*encrypt_rounds)(uint32_t *, uint32_t *, uint32_t);
-	void(*encrypt_subrounds)(uint32_t *, uint32_t *, uint32_t);
-	void(*decrypt_rounds)(uint32_t *, uint32_t *, uint32_t *, uint32_t, uint32_t);
-	void(*decrypt_subrounds)(uint32_t *, uint32_t *, uint32_t *, uint32_t, uint32_t);
-	void(*expand_bit)(linear_approximation_t *, int, int, int);
-	void(*special_expansion_cases)(linear_approximation_t *, int, int);
-	int(*get_letter)(int, int);
-	void(*differential_update)(uint32_t *, int, int *);
-	char name[10];
+    int alg_type;
+    uint32_t key_positions[8];
+    uint32_t iv_positions[4];
+    int number_of_rounds;
+    int number_of_subrounds_in_one_round;
+    void(*init)(uint32_t *, uint32_t *, uint32_t *, uint32_t *);
+    void(*rounds)(uint32_t *, uint32_t, uint32_t);
+    void(*subrounds)(uint32_t *, uint32_t, uint32_t);
+    void(*invert_rounds)(uint32_t *, uint32_t, uint32_t);
+    void(*invert_subrounds)(uint32_t *, uint32_t, uint32_t);
+    void(*encrypt_rounds)(uint32_t *, uint32_t *, uint32_t);
+    void(*encrypt_subrounds)(uint32_t *, uint32_t *, uint32_t);
+    void(*decrypt_rounds)(uint32_t *, uint32_t *, uint32_t *, uint32_t, uint32_t);
+    void(*decrypt_subrounds)(uint32_t *, uint32_t *, uint32_t *, uint32_t, uint32_t);
+    void(*expand_bit)(linear_approximation_t *, int, int, int);
+    void(*special_expansion_cases)(linear_approximation_t *, int, int);
+    int(*get_letter)(int, int);
+    void(*differential_update)(uint32_t *, int, int *);
+    char name[10];
 } algorithm;
 
 #define ALG_TYPE_CHACHA 0

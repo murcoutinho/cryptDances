@@ -27,11 +27,11 @@
 
 typedef struct expansion
 {
-	uint32_t list_of_words[10];
-	uint32_t list_of_bits[10];
-	uint32_t number_of_terms;
-	uint32_t number_of_linear_terms;
-	uint32_t special_cases_bits[NUMBER_OF_SPECIAL_CASES][2];
+    uint32_t list_of_words[10];
+    uint32_t list_of_bits[10];
+    uint32_t number_of_terms;
+    uint32_t number_of_linear_terms;
+    uint32_t special_cases_bits[NUMBER_OF_SPECIAL_CASES][2];
 } expansion;
 
 #endif

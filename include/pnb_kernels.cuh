@@ -31,16 +31,16 @@ void compute_complexity_of_the_attack(pnb_t *pnb);
 
 
 void pnb_attack_for_single_bit_differential(
-	int idw, 
-	int idb, 
-	int odw, 
-	int odb, 
-	int subrounds,
-	int differential_part_subrounds,
-	int linear_part_subrounds, 
-	double threshold,
-	int alg_type,
-	FILE *output_file
-	);
+    int idw, 
+    int idb, 
+    int odw, 
+    int odb, 
+    int subrounds,
+    int differential_part_subrounds,
+    int linear_part_subrounds, 
+    double threshold,
+    int alg_type,
+    FILE *output_file
+    );
 
 #endif

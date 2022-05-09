@@ -17,13 +17,13 @@ int main()
     srand((unsigned int)time(NULL));
 
     MPI_Init(NULL, NULL);
-	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
     //Host do not have GPUs...
     if(my_rank == 0)
     {
-	    MPI_Finalize();
+        MPI_Finalize();
         return RV_SUCESS;
     }
 
@@ -43,6 +43,6 @@ int main()
 
     cudaFree(dev_states);
 
-	MPI_Finalize();
+    MPI_Finalize();
     return RV_SUCESS;
 }
