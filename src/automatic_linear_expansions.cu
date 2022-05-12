@@ -192,12 +192,12 @@ void expand_linear_equation(linear_approximation_t *la, int subrounds)
 {
     linear_approximation_t aux_la = {0};
 
-	lob_compute_list_of_bits_from_mask(&(la->input));
+    lob_compute_list_of_bits_from_mask(&(la->input));
     memcpy(&aux_la, la, sizeof(linear_approximation_t));
     for(int i=0; i<subrounds; i++)
     {
         expand_linear_equation_for_single_subround(&aux_la);
-	    lob_compute_list_of_bits_from_mask(&(aux_la.output));
+        lob_compute_list_of_bits_from_mask(&(aux_la.output));
         memcpy(&aux_la.input, &aux_la.output, sizeof(list_of_bits_t));
         memset(&aux_la.output, 0x00, sizeof(list_of_bits_t));
     }

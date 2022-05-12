@@ -32,8 +32,8 @@ __host__ __device__ void chacha_invert_subrounds(uint32_t state[STATE_SIZE], uin
  __host__ __device__ int chacha_get_letter(int target_word, int subround);
 
 __host__ __device__ void chacha_differential_update(
-	uint32_t diff[STATE_SIZE], 
-	int subrounds,
-	int *correlation_exponent
-	);
+    uint32_t diff[STATE_SIZE], 
+    int subrounds,
+    int *correlation_exponent
+    );
  #endif

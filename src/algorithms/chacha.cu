@@ -101,22 +101,22 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
 {
     uint32_t i;
 
-	for (i = 1; i <= rounds; i++) {
-		if ((last_round + i) % 2)
-			chacha_invert_even_round(state);
-		else
-			chacha_invert_odd_round(state);
-	}
+    for (i = 1; i <= rounds; i++) {
+        if ((last_round + i) % 2)
+            chacha_invert_even_round(state);
+        else
+            chacha_invert_odd_round(state);
+    }
 }
 
 
 
  __host__ __device__ void chacha_subrounds(uint32_t state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
-	uint32_t i, rounds;
-	
-	if((last_subround%CHACHA_TOTAL_OF_DIFFERENT_SUBROUNDS) != 0)
-	{
+    uint32_t i, rounds;
+    
+    if((last_subround%CHACHA_TOTAL_OF_DIFFERENT_SUBROUNDS) != 0)
+    {
         last_subround %= CHACHA_TOTAL_OF_DIFFERENT_SUBROUNDS;
         switch(last_subround)
         {
@@ -159,17 +159,17 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
         CHACHAQUARTERROUND(state[3], state[4], state[9], state[14])
     }
 
-	if(subrounds==0)return;
+    if(subrounds==0)return;
     HALF_1_CHACHAQUARTERROUND(state[0], state[4], state[8], state[12])
     HALF_1_CHACHAQUARTERROUND(state[1], state[5], state[9], state[13])
     HALF_1_CHACHAQUARTERROUND(state[2], state[6], state[10], state[14])
     HALF_1_CHACHAQUARTERROUND(state[3], state[7], state[11], state[15])
-	if(subrounds==1)return;
-	HALF_2_CHACHAQUARTERROUND(state[0], state[4], state[8], state[12])
+    if(subrounds==1)return;
+    HALF_2_CHACHAQUARTERROUND(state[0], state[4], state[8], state[12])
     HALF_2_CHACHAQUARTERROUND(state[1], state[5], state[9], state[13])
     HALF_2_CHACHAQUARTERROUND(state[2], state[6], state[10], state[14])
     HALF_2_CHACHAQUARTERROUND(state[3], state[7], state[11], state[15])
-	if(subrounds==2)return;
+    if(subrounds==2)return;
     HALF_1_CHACHAQUARTERROUND(state[0], state[5], state[10], state[15])
     HALF_1_CHACHAQUARTERROUND(state[1], state[6], state[11], state[12])
     HALF_1_CHACHAQUARTERROUND(state[2], state[7], state[8], state[13])
@@ -178,10 +178,10 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
 
  __host__ __device__ void chacha_invert_subrounds(uint32_t state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
-	uint32_t i, rounds;
-	
-	if((last_subround%CHACHA_TOTAL_OF_DIFFERENT_SUBROUNDS) != 0)
-	{
+    uint32_t i, rounds;
+    
+    if((last_subround%CHACHA_TOTAL_OF_DIFFERENT_SUBROUNDS) != 0)
+    {
         last_subround %= CHACHA_TOTAL_OF_DIFFERENT_SUBROUNDS;
         switch(last_subround)
         {
@@ -223,17 +223,17 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
         INVERT_CHACHAQUARTERROUND(state[0], state[4], state[8], state[12])
     }
 
-	if(subrounds==0)return;
+    if(subrounds==0)return;
     INVERT_HALF_2_CHACHAQUARTERROUND(state[0], state[5], state[10], state[15])
     INVERT_HALF_2_CHACHAQUARTERROUND(state[1], state[6], state[11], state[12])
     INVERT_HALF_2_CHACHAQUARTERROUND(state[2], state[7], state[8], state[13])
     INVERT_HALF_2_CHACHAQUARTERROUND(state[3], state[4], state[9], state[14])
-	if(subrounds==1)return;
+    if(subrounds==1)return;
     INVERT_HALF_1_CHACHAQUARTERROUND(state[0], state[5], state[10], state[15])
     INVERT_HALF_1_CHACHAQUARTERROUND(state[1], state[6], state[11], state[12])
     INVERT_HALF_1_CHACHAQUARTERROUND(state[2], state[7], state[8], state[13])
     INVERT_HALF_1_CHACHAQUARTERROUND(state[3], state[4], state[9], state[14])
-	if(subrounds==2)return;
+    if(subrounds==2)return;
     INVERT_HALF_2_CHACHAQUARTERROUND(state[0], state[4], state[8], state[12])
     INVERT_HALF_2_CHACHAQUARTERROUND(state[1], state[5], state[9], state[13])
     INVERT_HALF_2_CHACHAQUARTERROUND(state[2], state[6], state[10], state[14])
@@ -413,12 +413,12 @@ c = minHwMaxGammaDPA(c, d,correlation_exponent);              \
 b = ROTATE(XOR(b, c), 7);
 
 __host__ __device__ void chacha_differential_update(
-	uint32_t diff[STATE_SIZE], 
-	int subrounds,
-	int *correlation_exponent
-	)
+    uint32_t diff[STATE_SIZE], 
+    int subrounds,
+    int *correlation_exponent
+    )
 {
-	*correlation_exponent = 0;
+    *correlation_exponent = 0;
 
     for(int r=0;r<subrounds;r++)
     {
