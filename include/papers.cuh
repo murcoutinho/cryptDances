@@ -224,10 +224,10 @@ differential_t paperdiff[] = {
             {"[Coutinho 22]", -0.00053, 0, 0, 0,0}
         },
 #endif
-		{0,{0},{0}, "Stop", 0,0,0,0} //Do not remove this line!
-	};
+        {0,{0},{0}, "Stop", 0,0,0,0} //Do not remove this line!
+    };
 
-	linear_approximation_t paperlin[] = {
+    linear_approximation_t paperlin[] = {
 #ifdef CHOUDHURI_2016_LINEAR_APPROXIMATIONS
         {
             ALG_TYPE_SALSA, 
@@ -409,6 +409,6 @@ differential_t paperdiff[] = {
             {"[Coutinho 22]",0.0476 , 0,0,0,0}
         },
 #endif
-		{0,{0},{0}, "Stop", 0,0,0,0} //Do not remove this line!
-	};
+        {0,{0},{0}, "Stop", 0,0,0,0} //Do not remove this line!
+    };
 #endif
