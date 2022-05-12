@@ -53,3 +53,4 @@ dkms.conf
 
 # Data
 *.dat
+.DS_Store
