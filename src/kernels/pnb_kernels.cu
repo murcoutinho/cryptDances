@@ -376,8 +376,9 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
     cudaStreamDestroy(stream);
     vector<unsigned long long int> v(local_medians, local_medians + iterations*n_threads*n_blocks);
     v.pop_back();
-    auto parmed= par::median(v);
+    auto parmed = par::median(v);
     free(local_medians);
+    //if (my_rank==0) printf("rank %d, median %llu\n", my_rank, parmed);
     pnb->correlation_of_g.correlation_count = parmed;
     ct_compute_and_test_correlation_using_median(&(pnb->correlation_of_g), n_tests_for_each_thread);
 }
