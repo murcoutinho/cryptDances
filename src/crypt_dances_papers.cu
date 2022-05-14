@@ -102,19 +102,19 @@ void linear_results(FILE *output_file)
 
 void pnb_results(FILE *output_file)
 {
-#ifdef AUMASSON_2008_PNB
+
     //TABLE 2
-    pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.9, ALG_TYPE_SALSA, output_file);
-    pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.8, ALG_TYPE_SALSA, output_file);
-    pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.7, ALG_TYPE_SALSA, output_file);
-    pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.6, ALG_TYPE_SALSA, output_file);
+    //pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.9, ALG_TYPE_SALSA, output_file);
+    //pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.8, ALG_TYPE_SALSA, output_file);
+    //pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.7, ALG_TYPE_SALSA, output_file);
+    //pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.6, ALG_TYPE_SALSA, output_file);
     pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.5, ALG_TYPE_SALSA, output_file);
 
     //Attacks sec 3.5
-    pnb_attack_for_single_bit_differential(7,31,1,14,8,4,0,0.12, ALG_TYPE_SALSA, output_file);
-    pnb_attack_for_single_bit_differential(13,13,11,0,12,6,0,0.6, ALG_TYPE_CHACHA, output_file);
-    pnb_attack_for_single_bit_differential(13,13,11,0,14,6,0,0.5, ALG_TYPE_CHACHA, output_file);
-#endif
+    //pnb_attack_for_single_bit_differential(7,31,1,14,8,4,0,0.12, ALG_TYPE_SALSA, output_file);
+    //pnb_attack_for_single_bit_differential(13,13,11,0,12,6,0,0.6, ALG_TYPE_CHACHA, output_file);
+    //pnb_attack_for_single_bit_differential(13,13,11,0,14,6,0,0.5, ALG_TYPE_CHACHA, output_file);
+
 
 #ifdef CHOUDHURI_2016_PNB
     pnb_attack_for_single_bit_differential(12,21,2,0,12,6,2,0.4, ALG_TYPE_CHACHA, output_file);
@@ -141,8 +141,8 @@ int main()
     if(my_rank == 0)
         p = fopen("results/paper_results.dat", "w");
 
-    differential_results(p);
-    linear_results(p);
+    //differential_results(p);
+    //linear_results(p);
     pnb_results(p);
 
     if(my_rank == 0)

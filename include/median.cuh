@@ -145,3 +145,4 @@ namespace par {
         return median(x);
     }
 }
+#endif //PARALLEL_MEDIAN_MEDIAN_HPP

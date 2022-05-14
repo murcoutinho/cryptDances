@@ -163,7 +163,7 @@ __global__ void compute_bias_of_g_for_random_key_kernel_using_median(
         unsigned long long seed, uint32_t enc_subrounds, uint32_t dec_subrounds,
         uint32_t *id_mask, uint32_t *od_mask,
         uint32_t *pnb, uint32_t number_of_pnb, int n_test_for_each_thread,
-        unsigned long long int *d_result, int alg_type, double * medians, int iteration
+        unsigned long long int *d_result, int alg_type, double * medians, int iteration,
         unsigned long long int blocks, unsigned long long int threads
 )
 {
@@ -332,7 +332,7 @@ void compute_correlation_of_g(pnb_t *pnb)
 
 void compute_correlation_of_g_using_median(pnb_t *pnb)
 {
-    int n_tests_for_each_thread = (1 << 10), n_threads = (1 << 8), n_blocks = (1 << 6);
+    int n_tests_for_each_thread = (1 << 15), n_threads = (1 << 7), n_blocks = (1 << 7);
     int executions_per_kernel = n_tests_for_each_thread * n_threads*n_blocks;
     uint64_t iterations;
     uint64_t result = 0, seed, local_sum=0;
@@ -383,14 +383,14 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
     cudaFree(d_medians);
     cudaStreamSynchronize(stream);
     cudaStreamDestroy(stream);
-    MPI_Allreduce(&local_sum, &result, 1, MPI_UINT64_T, MPI_SUM, MPI_COMM_WORLD);
+    //MPI_Allreduce(&local_sum, &result, 1, MPI_UINT64_T, MPI_SUM, MPI_COMM_WORLD);
     vector<double> v(local_medians, local_medians + iterations*n_threads*n_blocks);//sizeof local_medians / sizeof local_medians[0]);
     v.pop_back();
     auto parmed= par::median(v);
     if(my_rank == 0) { printf("Computing mediannnnnn >>> %f, %llu", parmed, result); }
     free(local_medians);
     pnb->correlation_of_g.correlation_count = parmed;
-    ct_compute_and_test_correlation(&(pnb->correlation_of_g));
+    ct_compute_and_test_correlation_using_median(&(pnb->correlation_of_g));
 }
 
 

@@ -54,6 +54,7 @@ void lob_set_bit(list_of_bits_t *lob, int word, int bit);
 void differential_print(FILE *p, differential_t diff);
 void la_print(FILE *p, linear_approximation_t lin_approx);
 void ct_compute_and_test_correlation(correlation_t *corr);
+void ct_compute_and_test_correlation_using_median(correlation_t *corr);
 void print_latex_linear_relation(linear_approximation_t *lin_approx);
 void differential_compute_from_single_bit(differential_t *diff, int idw, int idb, int odw, int odb, int output_subround, int alg_type);
 void la_compute_from_differential(linear_approximation_t *la, differential_t diff, int subrounds);
