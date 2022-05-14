@@ -142,8 +142,8 @@ int main()
     if(my_rank == 0)
         p = fopen("results/paper_results.dat", "w");
 
-    //differential_results(p);
-    //linear_results(p);
+    differential_results(p);
+    linear_results(p);
     pnb_results(p);
 
     if(my_rank == 0)
