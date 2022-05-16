@@ -1,3 +1,6 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include "arx_cryptanalysis.cuh"
 #include "papers.cuh"
 
@@ -204,6 +207,31 @@ void pnb_results(FILE *output_file)
 #endif
 }
 
+extern int errno;
+
+void create_folder_if_doesnt_exist(char *name) {
+    struct stat sb;
+    e = stat(name, &sb);
+    if (e != 0)
+    {
+        if (errno = ENOENT)
+            {
+            // fprintf(stderr, "The directory does not exist. Creating new directory...\n");
+            // Add more flags to the mode if necessary.
+            e = mkdir(name, S_IRWXU);
+            if (e != 0)
+                {
+                fprintf(stderr, "mkdir failed; errno=%d\n",errno);
+                exit(1);
+                }
+            }
+    } else {
+        if (sb.st_mode & S_IFREG)
+            fprintf(stderr, "%s is a regular file.\n",name);
+            exit(1);  
+    }
+}
+
 int main()
 {
     FILE *p = NULL;
@@ -212,17 +240,10 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
-    if(my_rank == 0)
-    {
+    if(my_rank == 0) {
+        create_folder_if_doesnt_exist("results/");
         p = fopen("results/paper_results.dat", "w");
-        if(p==NULL) 
-        {
-            printf("Error when trying to open result file\n");
-            MPI_Finalize();
-            exit(0);
-        }
     }
-
     differential_results(p);
     linear_results(p);
     pnb_results(p);
@@ -233,4 +254,3 @@ int main()
     MPI_Finalize();
     return 0;
 }
-
