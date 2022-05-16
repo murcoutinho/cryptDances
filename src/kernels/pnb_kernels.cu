@@ -307,6 +307,8 @@ void pnb_attack_for_single_bit_differential(
     int differential_part_subrounds,
     int linear_part_subrounds, 
     double threshold,
+    uint64_t number_of_trials_for_neutrality,
+    uint64_t number_of_trials_for_bias_of_g,
     int alg_type,
     FILE *output_file
     )
@@ -319,11 +321,10 @@ void pnb_attack_for_single_bit_differential(
     differential_compute_from_single_bit(&pnb.diff, idw, idb, odw, odb, differential_part_subrounds, alg_type);
     la_compute_from_differential(&pnb.la, pnb.diff, linear_part_subrounds);
 
-    compute_neutrality_vector(&pnb, (1<<26));
+    compute_neutrality_vector(&pnb, number_of_trials_for_neutrality);
     get_pnb_list(&pnb);
 
-    pnb.correlation_of_g.number_of_trials = 1;
-    pnb.correlation_of_g.number_of_trials <<= 34;
+    pnb.correlation_of_g.number_of_trials = number_of_trials_for_bias_of_g;
     compute_correlation_of_g(&pnb);
         
     compute_complexity_of_the_attack(&pnb);
@@ -331,3 +332,6 @@ void pnb_attack_for_single_bit_differential(
     if(my_rank == 0)
         pnb_print(output_file, pnb);
 }
+
+
+

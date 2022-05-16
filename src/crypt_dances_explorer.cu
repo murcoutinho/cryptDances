@@ -7,6 +7,7 @@
 
 int my_rank, num_procs;
 
+//This is an example of how to use automatic linear expansions with expand_linear_equation
 void coutinho_2022_chacha_linear_approximations()
 {
     uint64_t N = 1;
@@ -102,6 +103,7 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
+    printf("%d\n",my_rank);
     example_differential_correlation();
     coutinho_2022_chacha_linear_approximations();
 

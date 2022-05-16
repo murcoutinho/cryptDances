@@ -29,7 +29,6 @@ void get_pnb_list(pnb_t *pnb);
 //compute complexity of pnb attack
 void compute_complexity_of_the_attack(pnb_t *pnb);
 
-
 void pnb_attack_for_single_bit_differential(
     int idw, 
     int idb, 
@@ -39,6 +38,8 @@ void pnb_attack_for_single_bit_differential(
     int differential_part_subrounds,
     int linear_part_subrounds, 
     double threshold,
+    uint64_t number_of_trials_for_neutrality,
+    uint64_t number_of_trials_for_bias_of_g,
     int alg_type,
     FILE *output_file
     );
