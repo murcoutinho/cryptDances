@@ -103,15 +103,16 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
-    printf("%d\n",my_rank);
-    example_differential_correlation();
-    coutinho_2022_chacha_linear_approximations();
+    // example_differential_correlation();
+    // coutinho_2022_chacha_linear_approximations();
 
-    //The following code was used to find all single bit differentials for 4 rounds of Salsa in order to apply BLE
-    uint64_t number_of_trials = 1;
-    number_of_trials<<=28;
-    compute_all_single_bit_differential_correlation(ALG_TYPE_SALSA, 4, 0, 
-        number_of_trials, "all_single_bit_differentials_for_4_rounds_of_salsa.dat");
+    // //The following code was used to find all single bit differentials for 4 rounds of Salsa in order to apply BLE
+    // uint64_t number_of_trials = 1;
+    // number_of_trials<<=28;
+    // compute_all_single_bit_differential_correlation(ALG_TYPE_SALSA, 4, 0, 
+    //     number_of_trials, "all_single_bit_differentials_for_4_rounds_of_salsa.dat");
+
+    euro2022(NULL);
 
     MPI_Finalize();
     return 0;
