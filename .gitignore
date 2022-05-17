@@ -54,3 +54,6 @@ dkms.conf
 # Data
 *.dat
 .DS_Store
+
+# Build folders
+build
