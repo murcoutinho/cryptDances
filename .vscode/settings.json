@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "algorithm": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "__node_handle": "cpp",
+        "iterator": "cpp"
     }
 }

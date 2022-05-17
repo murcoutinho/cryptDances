@@ -113,6 +113,48 @@ void salsa_pnb_attack_using_ble(FILE *output_file)
     }
 }
 
+void euro2022(FILE *output_file)
+{
+    pnb_t pnb = {0};
+    algorithm alg;
+    int diff_E1_subrounds = 2, diff_E2_subrounds = 5, linear_part_subrounds = 1;
+    int k=0, alg_type = ALG_TYPE_CHACHA;
+
+    int idw = 13, idb = 6, odw = 2, odb = 0;
+    pnb.subrounds = 14;
+    pnb.threshold = 0.2;
+    pnb.alg_type = alg_type;
+    uint64_t number_of_trials_for_neutrality = (1<<28), number_of_trials_for_bias_of_g = 1;
+    number_of_trials_for_bias_of_g<<=31;
+
+    //Use Lipmaa and Moriai to compute first round differential
+    define_alg(&alg, alg_type);
+    lob_define_single_bit(&pnb.diff.input, idw, idb, 0);
+    alg.differential_update(pnb.diff.input.mask, diff_E1_subrounds, &k);
+    lob_compute_list_of_bits_from_mask(&pnb.diff.input);
+    pnb.diff.input.subround = diff_E1_subrounds;
+
+    lob_define_single_bit(&pnb.diff.output, odw, odb, diff_E2_subrounds + diff_E1_subrounds);
+    search_until_find_correlation(&pnb.diff, TYPE_DIFFERENTIAL);
+    la_compute_from_differential(&pnb.la, pnb.diff, linear_part_subrounds);
+
+    compute_neutrality_vector(&pnb, number_of_trials_for_neutrality);
+    get_pnb_list(&pnb);
+
+    pnb_remove(&pnb, 49); pnb_remove(&pnb, 51); pnb_remove(&pnb, 52);
+    pnb_remove(&pnb, 59); pnb_remove(&pnb, 169);
+
+    pnb_iteractive_selection(&pnb, 0.45, number_of_trials_for_bias_of_g, 12);
+    pnb.correlation_of_g.number_of_trials = number_of_trials_for_bias_of_g;
+
+    compute_correlation_of_g(&pnb);
+    compute_complexity_of_the_attack(&pnb);
+
+    if(my_rank == 0)
+        pnb_print(output_file, pnb);
+}
+
+
 void differential_results(FILE *output_file)
 {
     int count = 0;
@@ -205,16 +247,19 @@ void pnb_results(FILE *output_file)
 #ifdef COUTINHO_2022_SALSA_PNB
     salsa_pnb_attack_using_ble(output_file);
 #endif
+#ifdef DEY_2022_CHACHA_PNB
+    euro2022(output_file);
+#endif
 }
 
 extern int errno;
 
 void create_folder_if_doesnt_exist(char *name) {
     struct stat sb;
-    e = stat(name, &sb);
+    int e = stat(name, &sb);
     if (e != 0)
     {
-        if (errno = ENOENT)
+        if (errno == ENOENT)
             {
             // fprintf(stderr, "The directory does not exist. Creating new directory...\n");
             // Add more flags to the mode if necessary.
@@ -241,7 +286,7 @@ int main()
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
     if(my_rank == 0) {
-        create_folder_if_doesnt_exist("results/");
+        //create_folder_if_doesnt_exist("results/");
         p = fopen("results/paper_results.dat", "w");
     }
     differential_results(p);
