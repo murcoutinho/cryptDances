@@ -9,24 +9,31 @@ MPILIB=/opt/openmpi/lib
 BASE=src/algorithms/*.cu  src/kernels/*.cu src/util.cu src/cryptanalysis_types.cu src/automatic_linear_expansions.cu
 FLAGS=-lmpi -lopen-rte -lopen-pal -lnsl -lutil -lm
 
+BUILD_DIR = build
+
 .PHONY: all
-all: crypt_dances_papers crypt_dances_explorer crypt_dances_tests
+all: $(BUILD_DIR)/crypt_dances_papers $(BUILD_DIR)/crypt_dances_explorer $(BUILD_DIR)/crypt_dances_tests
 
-crypt_dances_papers: 
-	$(CC) $(ARCH) $(INCLUDE) -rdc=true $(BASE) src/crypt_dances_papers.cu
-	$(CC) -lm -L$(MPILIB) $(FLAGS) *.o -o crypt_dances_papers
-	-rm $@.o
+$(BUILD_DIR)/crypt_dances_papers: 
+	@mkdir -p $(BUILD_DIR)
+	@$(CC) $(ARCH) $(INCLUDE) -rdc=true $(BASE) src/crypt_dances_papers.cu
+	@$(CC) -lm -L$(MPILIB) $(FLAGS) *.o -o $@
+	@rm *.o
 	
-crypt_dances_explorer: 
-	$(CC) $(ARCH) $(INCLUDE) -rdc=true $(BASE) src/crypt_dances_explorer.cu
-	$(CC) -lm -L$(MPILIB) $(FLAGS) *.o -o crypt_dances_explorer
-	-rm $@.o
+$(BUILD_DIR)/crypt_dances_explorer: 
+	@mkdir -p $(BUILD_DIR)
+	@$(CC) $(ARCH) $(INCLUDE) -rdc=true $(BASE) src/crypt_dances_explorer.cu
+	@$(CC) -lm -L$(MPILIB) $(FLAGS) *.o -o $@
+	@rm *.o
 
-crypt_dances_tests: 
-	$(CC) $(ARCH) $(INCLUDE) -rdc=true $(BASE) test/*.cu
-	$(CC) -lm -L$(MPILIB) $(FLAGS) *.o -o crypt_dances_tests
-	-rm $@.o
+$(BUILD_DIR)/crypt_dances_tests: 
+	@mkdir -p $(BUILD_DIR)
+	@$(CC) $(ARCH) $(INCLUDE) -rdc=true $(BASE) test/*.cu
+	@$(CC) -lm -L$(MPILIB) $(FLAGS) *.o -o $@
+	@rm *.o
 
 .PHONY : clean
 clean :
-	-rm -f crypt_dances_explorer crypt_dances_papers crypt_dances_tests *.o *.o
+	@rm -rf $(BUILD_DIR)
+	@rm *.o
+
