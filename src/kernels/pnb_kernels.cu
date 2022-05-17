@@ -464,7 +464,7 @@ void pnb_attack_for_single_bit_differential(
     differential_compute_from_single_bit(&pnb.diff, idw, idb, odw, odb, differential_part_subrounds, alg_type);
     la_compute_from_differential(&pnb.la, pnb.diff, linear_part_subrounds);
     uint64_t compute_neutrality_vector_trials = 1;
-    compute_neutrality_vector(&pnb, (compute_neutrality_vector_trials<<28));
+    compute_neutrality_vector(&pnb, (compute_neutrality_vector_trials<<30));
     get_pnb_list(&pnb);
 
     pnb.correlation_of_g.number_of_trials = 1;
