@@ -92,4 +92,5 @@ int update_single_bit_differentials_from_file(
     const char *file_name, 
     differential_t diff[NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
     );
+void random_uint64(uint64_t *x);
 #endif

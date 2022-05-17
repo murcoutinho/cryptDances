@@ -9,6 +9,7 @@
 #include <cassert>
 #include <iomanip>
 #include <chrono>
+
 using namespace std::chrono;
 #include "median.cuh"
 
@@ -34,8 +35,12 @@ using namespace std::chrono;
 /*
 Alg of sec 3.3 of New features of latin dances.
 */
-__global__ void compute_neutrality_kernel(unsigned long long seed, uint32_t enc_subrounds, uint32_t dec_subrounds,
-uint32_t *id, uint32_t *od, int ntest, unsigned long long *d_result, int alg_type)
+
+__global__ void compute_neutrality_kernel(
+        unsigned long long seed, uint32_t enc_subrounds, uint32_t dec_subrounds,
+        uint32_t *id, uint32_t *od, int ntest, unsigned long long *d_result, int alg_type, int my_rank, int iteration,
+        int nthreads, int numblocks, unsigned long long int n_trials_per_proc
+)
 {
     int word = blockIdx.y, neutral_bit = blockIdx.z, neutral_word;
 
@@ -54,8 +59,9 @@ uint32_t *id, uint32_t *od, int ntest, unsigned long long *d_result, int alg_typ
     define_alg(&alg, alg_type);
     neutral_word = alg.key_positions[word];
 
-    curand_init(seed, tid, 0, &rng);
-    neutral_diff = 1 << neutral_bit;
+    curand_init(seed, n_trials_per_proc*my_rank + iteration*nthreads*numblocks*8*32+tid, 0, &rng);
+    neutral_diff = 1;
+    neutral_diff <<= neutral_bit;
 
     for (uint64_t i = 0; i < ntest; i++)
     {
@@ -80,18 +86,16 @@ uint32_t *id, uint32_t *od, int ntest, unsigned long long *d_result, int alg_typ
         if (diff == new_diff)
             count++;
     }
-
-    //printf("ntest %d count = %d\n",ntest, count);
     atomicAdd(&d_result[32 * word + neutral_bit], count);
 }
 
 
 /*This function computes \varepsilon_a from a PNB attack as presented in aumasson 2008*/
 __global__ void compute_bias_of_g_for_random_key_kernel(
-    unsigned long long seed, uint32_t enc_subrounds, uint32_t dec_subrounds,
-    uint32_t *id_mask, uint32_t *od_mask,
-    uint32_t *pnb, uint32_t number_of_pnb, int n_test_for_each_thread,
-    unsigned long long int *d_result, int alg_type
+        unsigned long long seed, uint32_t enc_subrounds, uint32_t dec_subrounds,
+        uint32_t *id_mask, uint32_t *od_mask,
+        uint32_t *pnb, uint32_t number_of_pnb, int n_test_for_each_thread,
+        unsigned long long int *d_result, int alg_type
 )
 {
     algorithm alg;
@@ -235,49 +239,51 @@ __global__ void compute_bias_of_g_for_random_key_kernel_using_median(
 
 void compute_neutrality_vector(pnb_t *pnb, uint64_t number_of_trials)
 {
+
     unsigned long long int *d_results;
-    unsigned long long int h_results[KEY_SIZE_IN_BITS] = { 0 }, seed;
+    unsigned long long int h_results[KEY_SIZE_IN_BITS] = { 0 };
     uint64_t acc_results[KEY_SIZE_IN_BITS] = {0}, result[KEY_SIZE_IN_BITS] = {0};
-    int lenght = KEY_SIZE_IN_BITS * sizeof(unsigned long long int);
+    int lenght = KEY_SIZE_IN_BITS * sizeof(unsigned long long int), seed;
 
     uint32_t *d_id, *d_od;
     srand_by_rank();
-    uint64_t ntest = (1 << 10), nthreads = (1 << 8), numblocks = (1 << 1);
-    uint64_t iterations = number_of_trials/ntest/nthreads/numblocks/(num_procs-1);
-
-    if(my_rank!=0)
-    {
-        cudaSetDevice((my_rank-1)%NUMBER_OF_DEVICES_PER_MACHINE);
-        cudaMalloc((void **)&d_results, lenght);
-        cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
-        cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
-        cudaMemcpy(d_id, pnb->diff.input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_od, pnb->la.output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
-
-        for (int i = 0; i < iterations; i++)
-        {
-            memset(h_results, 0, lenght);
-            cudaMemcpy(d_results, h_results, lenght, cudaMemcpyHostToDevice);
-            seed = seed_by_rank();
-
-            compute_neutrality_kernel <<< dim3(numblocks, 8, 32), nthreads >>> (seed, pnb->subrounds,
-                pnb->subrounds-pnb->la.output.subround,
-                d_id, d_od, ntest, d_results, pnb->alg_type);
-
-            cudaMemcpy(h_results, d_results, lenght, cudaMemcpyDeviceToHost);
-
-            for(int j=0;j<KEY_SIZE_IN_BITS; j++)
-                acc_results[j]+= (uint64_t) h_results[j];
-        }
-        cudaFree(d_results);
-        cudaFree(d_id);
-        cudaFree(d_od);
+    uint64_t ntest = (1 << 15), nthreads = (1 << 8), numblocks = (1 << 1);
+    uint64_t iterations = number_of_trials/ntest/nthreads/numblocks/(num_procs);
+    if (iterations % 2 != 0) {
+        printf("For now (iterations % 2) should be 0\n");
+        exit(0);
     }
+
+    cudaSetDevice((my_rank)%NUMBER_OF_DEVICES_PER_MACHINE);
+    cudaMalloc((void **)&d_results, lenght);
+    cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
+    cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
+    cudaMemcpy(d_id, pnb->diff.input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_od, pnb->la.output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
+
+    for (int i = 0; i < iterations; i++)
+    {
+        memset(h_results, 0, lenght);
+        cudaMemcpy(d_results, h_results, lenght, cudaMemcpyHostToDevice);
+        seed = seed_by_rank();
+
+        compute_neutrality_kernel <<< dim3(numblocks, 8, 32), nthreads >>> (seed, pnb->subrounds,
+                                                                            pnb->subrounds-pnb->la.output.subround,
+                                                                            d_id, d_od, ntest, d_results, pnb->alg_type, my_rank, i, nthreads, numblocks, number_of_trials/(num_procs));
+
+        cudaMemcpy(h_results, d_results, lenght, cudaMemcpyDeviceToHost);
+        for(int j=0;j<KEY_SIZE_IN_BITS; j++)
+            acc_results[j]+= (uint64_t) h_results[j];
+    }
+    cudaFree(d_results);
+    cudaFree(d_id);
+    cudaFree(d_od);
 
     MPI_Allreduce(&acc_results, &result, KEY_SIZE_IN_BITS, MPI_UINT64_T, MPI_SUM, MPI_COMM_WORLD);
 
-    for (int bit = 0; bit<KEY_SIZE_IN_BITS; bit++)
-        pnb->neutrality_measure[bit] = 2 * ((double)result[bit]) / number_of_trials - 1;
+    for (int bit = 0; bit<KEY_SIZE_IN_BITS; bit++) {
+        pnb->neutrality_measure[bit] = 2 * ((double) result[bit]) / number_of_trials - 1;
+    }
 }
 
 void compute_correlation_of_g(pnb_t *pnb)
@@ -313,8 +319,8 @@ void compute_correlation_of_g(pnb_t *pnb)
             cudaMemcpy(d_sum_parity, &local_sum_parity, sizeof(unsigned long long int), cudaMemcpyHostToDevice);
 
             compute_bias_of_g_for_random_key_kernel <<< n_blocks, n_threads >>> ((unsigned long long)seed,
-                pnb->subrounds, pnb->subrounds - pnb->la.output.subround, d_id, d_od, dPNB,
-                pnb->number_of_pnb, n_tests_for_each_thread, d_sum_parity, pnb->alg_type);
+                                                                                 pnb->subrounds, pnb->subrounds - pnb->la.output.subround, d_id, d_od, dPNB,
+                                                                                 pnb->number_of_pnb, n_tests_for_each_thread, d_sum_parity, pnb->alg_type);
 
             cudaMemcpy(&local_sum_parity, d_sum_parity, sizeof(unsigned long long int), cudaMemcpyDeviceToHost);
             local_sum += (uint64_t) local_sum_parity;
@@ -340,7 +346,12 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
     unsigned long long int * d_medians;
 
     srand_by_rank();
+    // TOOD:: Consider odd num_procs
     iterations = pnb->correlation_of_g.number_of_trials / (executions_per_kernel) / (num_procs);
+    if (iterations % 2 != 0) {
+        printf("For now (iterations % 2) should be 0\n");
+        exit(0);
+    }
     unsigned long long int * local_medians = (unsigned long long int*) malloc(iterations*n_threads*n_blocks*sizeof(unsigned long long int));//iterations*n_threads*n_blocks];
     memset(local_medians, 0, iterations*n_threads*n_blocks*sizeof(unsigned long long int));
 
@@ -362,10 +373,10 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
         seed = seed_by_rank();
 
         compute_bias_of_g_for_random_key_kernel_using_median <<< n_blocks, n_threads, 0, stream >>> (
-            (unsigned long long)seed,
-            pnb->subrounds, pnb->subrounds - pnb->la.output.subround, d_id, d_od, dPNB,
-            pnb->number_of_pnb, n_tests_for_each_thread, pnb->alg_type,
-            d_medians, i, n_blocks, n_threads
+                (unsigned long long)seed,
+                pnb->subrounds, pnb->subrounds - pnb->la.output.subround, d_id, d_od, dPNB,
+                pnb->number_of_pnb, n_tests_for_each_thread, pnb->alg_type,
+                d_medians, i, n_blocks, n_threads
         );
     }
     cudaFree(d_id);
@@ -378,7 +389,6 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
     v.pop_back();
     auto parmed = par::median(v);
     free(local_medians);
-    //if (my_rank==0) printf("rank %d, median %llu\n", my_rank, parmed);
     pnb->correlation_of_g.correlation_count = parmed;
     ct_compute_and_test_correlation_using_median(&(pnb->correlation_of_g), n_tests_for_each_thread);
 }
@@ -434,17 +444,17 @@ void compute_complexity_of_the_attack(pnb_t *pnb)
 
 
 void pnb_attack_for_single_bit_differential(
-    int idw,
-    int idb,
-    int odw,
-    int odb,
-    int subrounds,
-    int differential_part_subrounds,
-    int linear_part_subrounds,
-    double threshold,
-    int alg_type,
-    FILE *output_file
-    )
+        int idw,
+        int idb,
+        int odw,
+        int odb,
+        int subrounds,
+        int differential_part_subrounds,
+        int linear_part_subrounds,
+        double threshold,
+        int alg_type,
+        FILE *output_file
+)
 {
     pnb_t pnb = {0};
 
@@ -453,12 +463,12 @@ void pnb_attack_for_single_bit_differential(
     pnb.alg_type = alg_type;
     differential_compute_from_single_bit(&pnb.diff, idw, idb, odw, odb, differential_part_subrounds, alg_type);
     la_compute_from_differential(&pnb.la, pnb.diff, linear_part_subrounds);
-
-    compute_neutrality_vector(&pnb, (1<<26));
+    uint64_t compute_neutrality_vector_trials = 1;
+    compute_neutrality_vector(&pnb, (compute_neutrality_vector_trials<<28));
     get_pnb_list(&pnb);
 
     pnb.correlation_of_g.number_of_trials = 1;
-    pnb.correlation_of_g.number_of_trials <<= 34;
+    pnb.correlation_of_g.number_of_trials <<= 36;
     compute_correlation_of_g_using_median(&pnb);
 
     compute_complexity_of_the_attack(&pnb);
