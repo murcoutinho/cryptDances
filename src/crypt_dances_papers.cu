@@ -1,8 +1,6 @@
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
 #include "arx_cryptanalysis.cuh"
 #include "papers.cuh"
+#include "util.cuh"
 
 int my_rank, num_procs;
 
@@ -205,31 +203,6 @@ void pnb_results(FILE *output_file)
 #ifdef COUTINHO_2022_SALSA_PNB
     salsa_pnb_attack_using_ble(output_file);
 #endif
-}
-
-extern int errno;
-
-void create_folder_if_doesnt_exist(char *name) {
-    struct stat sb;
-    e = stat(name, &sb);
-    if (e != 0)
-    {
-        if (errno = ENOENT)
-            {
-            // fprintf(stderr, "The directory does not exist. Creating new directory...\n");
-            // Add more flags to the mode if necessary.
-            e = mkdir(name, S_IRWXU);
-            if (e != 0)
-                {
-                fprintf(stderr, "mkdir failed; errno=%d\n",errno);
-                exit(1);
-                }
-            }
-    } else {
-        if (sb.st_mode & S_IFREG)
-            fprintf(stderr, "%s is a regular file.\n",name);
-            exit(1);  
-    }
 }
 
 int main()
