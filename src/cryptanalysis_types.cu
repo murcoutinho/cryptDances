@@ -61,6 +61,14 @@ void lob_set_bit(list_of_bits_t *lob, int word, int bit)
     lob_compute_list_of_bits_from_mask(lob);
 }
 
+void lob_define_single_bit(list_of_bits_t *lob, int word, int bit, int subround)
+{
+    memset(lob, 0x00, sizeof(list_of_bits_t));
+    lob->number_of_bits = 1;
+    lob->subround = subround;
+    lob_set_bit(lob, word, bit);
+}
+
 void differential_print(FILE *p, differential_t diff)
 {
     char name[10];
@@ -255,10 +263,8 @@ void differential_compute_from_single_bit(differential_t *diff, int idw, int idb
 {
     memset(diff, 0x00, sizeof(differential_t));
     diff->alg_type = alg_type;
-    lob_set_bit(&(diff->input), idw, idb);
-    lob_set_bit(&(diff->output), odw, odb);
-    diff->input.subround = 0;
-    diff->output.subround = output_subround;
+    lob_define_single_bit(&(diff->input), idw, idb, 0);
+    lob_define_single_bit(&(diff->output), odw, odb, output_subround);
     search_until_find_correlation(diff, TYPE_DIFFERENTIAL);
 }
 
@@ -274,4 +280,11 @@ void la_compute_from_differential(linear_approximation_t *la, differential_t dif
     }
     expand_linear_equation(la, subrounds);
     search_until_find_correlation(la, TYPE_LINEAR);
+}
+
+void pnb_define_alg(pnb_t *pnb, int alg_type)
+{
+    pnb->alg_type = alg_type;
+    pnb->diff.alg_type = alg_type;
+    pnb->la.alg_type = alg_type;
 }

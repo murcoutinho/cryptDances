@@ -247,7 +247,7 @@ void compute_neutrality_vector(pnb_t *pnb, uint64_t number_of_trials)
 
     uint32_t *d_id, *d_od;
     srand_by_rank();
-    uint64_t ntest = (1 << 15), nthreads = (1 << 8), numblocks = (1 << 1);
+    uint64_t ntest = (1 << 14), nthreads = (1 << 8), numblocks = (1 << 1);
     uint64_t iterations = number_of_trials/ntest/nthreads/numblocks/(num_procs);
     if (iterations % 2 != 0) {
         printf("For now (iterations % 2) should be 0\n");
@@ -444,35 +444,35 @@ void compute_complexity_of_the_attack(pnb_t *pnb)
 
 
 void pnb_attack_for_single_bit_differential(
-        int idw,
-        int idb,
-        int odw,
-        int odb,
-        int subrounds,
-        int differential_part_subrounds,
-        int linear_part_subrounds,
-        double threshold,
-        int alg_type,
-        FILE *output_file
-)
+    int idw, 
+    int idb, 
+    int odw, 
+    int odb, 
+    int subrounds,
+    int differential_part_subrounds,
+    int linear_part_subrounds, 
+    double threshold,
+    uint64_t number_of_trials_for_neutrality,
+    uint64_t number_of_trials_for_bias_of_g,
+    int alg_type,
+    FILE *output_file
+    )
 {
     pnb_t pnb = {0};
-
     pnb.subrounds = subrounds;
     pnb.threshold = threshold;
     pnb.alg_type = alg_type;
     differential_compute_from_single_bit(&pnb.diff, idw, idb, odw, odb, differential_part_subrounds, alg_type);
     la_compute_from_differential(&pnb.la, pnb.diff, linear_part_subrounds);
-    uint64_t compute_neutrality_vector_trials = 1;
-    compute_neutrality_vector(&pnb, (compute_neutrality_vector_trials<<30));
+    compute_neutrality_vector(&pnb, number_of_trials_for_neutrality);
     get_pnb_list(&pnb);
-
-    pnb.correlation_of_g.number_of_trials = 1;
-    pnb.correlation_of_g.number_of_trials <<= 36;
+    pnb.correlation_of_g.number_of_trials = number_of_trials_for_bias_of_g;
     compute_correlation_of_g_using_median(&pnb);
-
     compute_complexity_of_the_attack(&pnb);
 
     if(my_rank == 0)
         pnb_print(output_file, pnb);
 }
+
+
+
