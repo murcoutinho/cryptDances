@@ -3,6 +3,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 __host__ __device__ uint32_t aop(uint32_t x)
 {
@@ -329,7 +332,7 @@ void create_folder_if_doesnt_exist(const char *name) {
             {
             // fprintf(stderr, "The directory does not exist. Creating new directory...\n");
             // Add more flags to the mode if necessary.
-            e = mkdir(name, S_IRWXU);
+            e = mkdir(name);
             if (e != 0)
                 {
                 fprintf(stderr, "mkdir failed; errno=%d\n",errno);
