@@ -1,5 +1,8 @@
 #include "arx_cryptanalysis.cuh"
 #include <inttypes.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 __host__ __device__ uint32_t aop(uint32_t x)
 {
@@ -314,4 +317,28 @@ int update_single_bit_differentials_from_file(
     fclose(p);
     free(old_diff);
     return RV_SUCESS;
+}
+
+
+void create_folder_if_doesnt_exist(const char *name) {
+    struct stat sb;
+    int e = stat(name, &sb);
+    if (e != 0)
+    {
+        if (errno == ENOENT)
+            {
+            // fprintf(stderr, "The directory does not exist. Creating new directory...\n");
+            // Add more flags to the mode if necessary.
+            e = mkdir(name, S_IRWXU);
+            if (e != 0)
+                {
+                fprintf(stderr, "mkdir failed; errno=%d\n",errno);
+                exit(1);
+                }
+            }
+    } else {
+        if (sb.st_mode & S_IFREG)
+            fprintf(stderr, "%s is a regular file.\n",name);
+            exit(1);  
+    }
 }
