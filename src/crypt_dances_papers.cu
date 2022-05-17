@@ -163,8 +163,48 @@ void pnb_results(FILE *output_file)
     uint64_t number_of_trials_for_neutrality = (1<<30), number_of_trials_for_neutrality_for_bias_of_g = 1;
     number_of_trials_for_neutrality_for_bias_of_g <<= 34;
 
-    pnb_attack_for_single_bit_differential(5,11,10,0,20,8,0,0.25, number_of_trials_for_neutrality, 
+#ifdef AUMASSON_2008_PNB
+    //TABLE 2
+    pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.9, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_SALSA, output_file);
+    pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.8, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_SALSA, output_file);
+    pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.7, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_SALSA, output_file);
+    pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.6, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_SALSA, output_file);
+    pnb_attack_for_single_bit_differential(7,31,1,14,7,4,0,0.5, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_SALSA, output_file);
+
+    //Attacks sec 3.5
+    pnb_attack_for_single_bit_differential(7,31,1,14,8,4,0,0.12, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_SALSA, output_file);
+    pnb_attack_for_single_bit_differential(13,13,11,0,12,6,0,0.6, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_CHACHA, output_file);
+    pnb_attack_for_single_bit_differential(13,13,11,0,14,6,0,0.5, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_CHACHA, output_file);
+#endif
+
+#ifdef CHOUDHURI_2016_PNB
+    pnb_attack_for_single_bit_differential(12,21,2,0,12,6,2,0.4, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_CHACHA, output_file);
+    pnb_attack_for_single_bit_differential(12,21,2,0,12,6,0,0.4, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_CHACHA, output_file);
+#endif
+
+#ifdef COUTINHO_2020_PNB
+    pnb_attack_for_single_bit_differential(14,6,3,0,12,7,1,0.4, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_CHACHA, output_file);
+    pnb_attack_for_single_bit_differential(14,6,3,0,14,7,1,0.35, number_of_trials_for_neutrality,
+        number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_CHACHA, output_file);
+#endif
+#ifdef COUTINHO_2022_FORRO_PNB
+    pnb_attack_for_single_bit_differential(5,11,10,0,20,8,0,0.25, number_of_trials_for_neutrality,
         number_of_trials_for_neutrality_for_bias_of_g, ALG_TYPE_FORRO, output_file);
+#endif
+#ifdef COUTINHO_2022_SALSA_PNB
+    salsa_pnb_attack_using_ble(output_file);
+#endif
 
 
 }
@@ -206,7 +246,7 @@ int main()
         create_folder_if_doesnt_exist("results/");
         p = fopen("results/paper_results.dat", "w");
     }
-    //differential_results(p);
+    differential_results(p);
     linear_results(p);
     pnb_results(p);
 
