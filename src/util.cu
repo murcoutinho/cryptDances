@@ -332,7 +332,7 @@ void create_folder_if_doesnt_exist(const char *name) {
             {
             // fprintf(stderr, "The directory does not exist. Creating new directory...\n");
             // Add more flags to the mode if necessary.
-            e = mkdir(name);
+            e = mkdir(name, S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH | S_IRWXU);
             if (e != 0)
                 {
                 fprintf(stderr, "mkdir failed; errno=%d\n",errno);
