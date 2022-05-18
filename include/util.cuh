@@ -92,4 +92,6 @@ int update_single_bit_differentials_from_file(
     const char *file_name, 
     differential_t diff[NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
     );
+
+void create_folder_if_doesnt_exist(const char *name);
 #endif
