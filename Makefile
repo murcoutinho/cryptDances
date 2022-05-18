@@ -35,5 +35,5 @@ $(BUILD_DIR)/crypt_dances_tests:
 .PHONY : clean
 clean :
 	@rm -rf $(BUILD_DIR)
-	@rm *.o
+	@rm -f *.o
 
