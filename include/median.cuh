@@ -5,6 +5,7 @@
 #include <random>
 #include <iostream>
 #include <iterator>
+MPI_Comm   new_comm;
 using namespace std;
 template<class T> void split_vec(std::vector<T>& vec, T pivot, std::vector<T>& le, std::vector<T>& gr, std::vector<T>& pi){
 
@@ -80,8 +81,10 @@ namespace par {
         template<class T>
         double median(std::vector<T> x, size_t look_for) {
             std::random_device rd;
-            MPI_Comm_size(MPI_COMM_WORLD, &ws);
-            MPI_Comm_rank(MPI_COMM_WORLD, &rk);
+            if (MPI_COMM_NULL != new_comm) {
+                MPI_Comm_size(new_comm, &ws);
+                MPI_Comm_rank(new_comm, &rk);
+            }
             /**
              * Until vec.size() == 1
              * 1. Someone selects pivot and broadcast
@@ -95,18 +98,18 @@ namespace par {
             do {
                 size = x.size();
 
-                MPI_Reduce(&size, &total_size, 1, get_mpi_type<size_t>(), MPI_SUM, 0, MPI_COMM_WORLD);
-                MPI_Scan(&size, &ub, 1, get_mpi_type<size_t>(), MPI_SUM, MPI_COMM_WORLD);
+                MPI_Reduce(&size, &total_size, 1, get_mpi_type<size_t>(), MPI_SUM, 0, new_comm);
+                MPI_Scan(&size, &ub, 1, get_mpi_type<size_t>(), MPI_SUM, new_comm);
                 lb = ub - size;
                 ipivot = (rd() % total_size);
 
-                MPI_Bcast(&ipivot, 1, get_mpi_type<size_t>(), 0, MPI_COMM_WORLD);
+                MPI_Bcast(&ipivot, 1, get_mpi_type<size_t>(), 0, new_comm);
                 if(lb <= ipivot && ipivot < ub) {
                     pivot = x.at(ipivot - lb);
                     for(auto pe = 0; pe < ws; ++pe)
-                        if(pe != rk) MPI_Send(&pivot, 1, get_mpi_type<T>(), pe, 999, MPI_COMM_WORLD);
+                        if(pe != rk) MPI_Send(&pivot, 1, get_mpi_type<T>(), pe, 999, new_comm);
                 } else {
-                    MPI_Recv(&pivot, 1, get_mpi_type<T>(), MPI_ANY_SOURCE, 999, MPI_COMM_WORLD, MPI_STATUSES_IGNORE);
+                    MPI_Recv(&pivot, 1, get_mpi_type<T>(), MPI_ANY_SOURCE, 999, new_comm, MPI_STATUSES_IGNORE);
                 }
 
                 auto[lit, pit] = split_vec(x, pivot);
@@ -116,7 +119,7 @@ namespace par {
 
                 split_sizes = {le_size, pi_size};
 
-                MPI_Allreduce(MPI_IN_PLACE, &split_sizes, 2, get_mpi_type<size_t>(), MPI_SUM, MPI_COMM_WORLD);
+                MPI_Allreduce(MPI_IN_PLACE, &split_sizes, 2, get_mpi_type<size_t>(), MPI_SUM, new_comm);
 
                 if(look_for < split_sizes[0]) {
                     x = std::vector<T>(std::begin(x), lit);
@@ -132,7 +135,7 @@ namespace par {
     template<class T>
     double median(const std::vector<T>& x) {
         size_t total_size, size = x.size();
-        MPI_Allreduce(&size, &total_size, 1, get_mpi_type<size_t>(), MPI_SUM, MPI_COMM_WORLD);
+        MPI_Allreduce(&size, &total_size, 1, get_mpi_type<size_t>(), MPI_SUM, new_comm);
         if(total_size % 2) {
             return median<T>(x, total_size / 2);
         } else {

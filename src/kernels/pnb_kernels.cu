@@ -242,43 +242,45 @@ void compute_neutrality_vector(pnb_t *pnb, uint64_t number_of_trials)
 
     unsigned long long int *d_results;
     unsigned long long int h_results[KEY_SIZE_IN_BITS] = { 0 };
-    uint64_t acc_results[KEY_SIZE_IN_BITS] = {0}, result[KEY_SIZE_IN_BITS] = {0};
-    int lenght = KEY_SIZE_IN_BITS * sizeof(unsigned long long int), seed;
+    uint64_t acc_results[KEY_SIZE_IN_BITS] = {0}, result[KEY_SIZE_IN_BITS] = {0}, seed;
+    int lenght = KEY_SIZE_IN_BITS * sizeof(unsigned long long int);
 
     uint32_t *d_id, *d_od;
     srand_by_rank();
-    uint64_t ntest = (1 << 14), nthreads = (1 << 8), numblocks = (1 << 1);
-    uint64_t iterations = number_of_trials/ntest/nthreads/numblocks/(num_procs);
+
+    uint64_t ntest = (1 << 15), nthreads = (1 << 8), numblocks = (1 << 1);
+    uint64_t iterations = number_of_trials/ntest/nthreads/numblocks/(num_procs-1);
     if (iterations % 2 != 0) {
         printf("For now (iterations % 2) should be 0\n");
+        MPI_Finalize();
         exit(0);
     }
-
-    cudaSetDevice((my_rank)%NUMBER_OF_DEVICES_PER_MACHINE);
-    cudaMalloc((void **)&d_results, lenght);
-    cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
-    cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
-    cudaMemcpy(d_id, pnb->diff.input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_od, pnb->la.output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
-
-    for (int i = 0; i < iterations; i++)
+    if(my_rank!=0)
     {
-        memset(h_results, 0, lenght);
-        cudaMemcpy(d_results, h_results, lenght, cudaMemcpyHostToDevice);
-        seed = seed_by_rank();
+        cudaSetDevice((my_rank-1)%NUMBER_OF_DEVICES_PER_MACHINE);
+        cudaMalloc((void **)&d_results, lenght);
+        cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
+        cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
+        cudaMemcpy(d_id, pnb->diff.input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_od, pnb->la.output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
 
-        compute_neutrality_kernel <<< dim3(numblocks, 8, 32), nthreads >>> (seed, pnb->subrounds,
-                                                                            pnb->subrounds-pnb->la.output.subround,
-                                                                            d_id, d_od, ntest, d_results, pnb->alg_type, my_rank, i, nthreads, numblocks, number_of_trials/(num_procs));
+        for (int i = 0; i < iterations; i++)
+        {
+            memset(h_results, 0, lenght);
+            cudaMemcpy(d_results, h_results, lenght, cudaMemcpyHostToDevice);
+            seed = seed_by_rank();
+            compute_neutrality_kernel <<< dim3(numblocks, 8, 32), nthreads >>> (seed, pnb->subrounds,
+                                                                                pnb->subrounds-pnb->la.output.subround,
+                                                                                d_id, d_od, ntest, d_results, pnb->alg_type, my_rank, i, nthreads, numblocks, number_of_trials/(num_procs-1));
 
-        cudaMemcpy(h_results, d_results, lenght, cudaMemcpyDeviceToHost);
-        for(int j=0;j<KEY_SIZE_IN_BITS; j++)
-            acc_results[j]+= (uint64_t) h_results[j];
+            cudaMemcpy(h_results, d_results, lenght, cudaMemcpyDeviceToHost);
+            for(int j=0; j<KEY_SIZE_IN_BITS; j++)
+                acc_results[j]+= (uint64_t) h_results[j];
+        }
+        cudaFree(d_results);
+        cudaFree(d_id);
+        cudaFree(d_od);
     }
-    cudaFree(d_results);
-    cudaFree(d_id);
-    cudaFree(d_od);
-
     MPI_Allreduce(&acc_results, &result, KEY_SIZE_IN_BITS, MPI_UINT64_T, MPI_SUM, MPI_COMM_WORLD);
 
     for (int bit = 0; bit<KEY_SIZE_IN_BITS; bit++) {
@@ -338,6 +340,22 @@ void compute_correlation_of_g(pnb_t *pnb)
 
 void compute_correlation_of_g_using_median(pnb_t *pnb)
 {
+
+    MPI_Group world_group;
+    MPI_Comm_group(MPI_COMM_WORLD, &world_group);
+    int ranks[num_procs];
+    for (int i = 1; i < num_procs; i++)
+        ranks[i-1] = i;
+
+    // Construct a group containing all of the prime ranks in world_group
+    MPI_Group new_group;
+    MPI_Group_incl(world_group, num_procs - 1, ranks, &new_group);
+
+    // Create a new communicator based on the group
+    //MPI_Comm new_comm;
+    MPI_Comm_create_group(MPI_COMM_WORLD, new_group, 0, &new_comm);
+
+
     int n_tests_for_each_thread = (1 << 15), n_threads = (1 << 7), n_blocks = (1 << 7);
     int executions_per_kernel = n_tests_for_each_thread * n_threads*n_blocks;
     uint64_t iterations;
@@ -346,51 +364,64 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
     unsigned long long int * d_medians;
 
     srand_by_rank();
-    // TOOD:: Consider odd num_procs
-    iterations = pnb->correlation_of_g.number_of_trials / (executions_per_kernel) / (num_procs);
+    // TODO:: Consider even num_procs
+    iterations = pnb->correlation_of_g.number_of_trials / (executions_per_kernel) / (num_procs - 1);
     if (iterations % 2 != 0) {
-        printf("For now (iterations % 2) should be 0\n");
+        printf("For now (iterations % 2) should be 0%" PRIu64 "a\n", iterations);
         exit(0);
     }
-    unsigned long long int * local_medians = (unsigned long long int*) malloc(iterations*n_threads*n_blocks*sizeof(unsigned long long int));//iterations*n_threads*n_blocks];
-    memset(local_medians, 0, iterations*n_threads*n_blocks*sizeof(unsigned long long int));
+    unsigned long long parmed;
+    if (my_rank != 0) {
+        unsigned long long int *local_medians = (unsigned long long int *) malloc(
+                iterations * n_threads * n_blocks * sizeof(unsigned long long int));
+        memset(local_medians, 0, iterations * n_threads * n_blocks * sizeof(unsigned long long int));
 
-    cudaSetDevice((my_rank)%NUMBER_OF_DEVICES_PER_MACHINE);
-    cudaStream_t stream;
-    cudaStreamCreate(&stream);
+        cudaSetDevice((my_rank-1) % NUMBER_OF_DEVICES_PER_MACHINE);
+        cudaStream_t stream;
+        cudaStreamCreate(&stream);
 
-    cudaMalloc(&d_medians, sizeof(unsigned long long int)*iterations*n_threads*n_blocks);
-    cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
-    cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
-    cudaMalloc(&dPNB, pnb->number_of_pnb * sizeof(uint32_t));
+        cudaMalloc(&d_medians, sizeof(unsigned long long int) * iterations * n_threads * n_blocks);
+        cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
+        cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
+        cudaMalloc(&dPNB, pnb->number_of_pnb * sizeof(uint32_t));
 
-    cudaMemcpyAsync(d_id, pnb->diff.input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
-    cudaMemcpyAsync(d_od, pnb->la.output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
-    cudaMemcpyAsync(dPNB, pnb->pnb, pnb->number_of_pnb * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
+        cudaMemcpyAsync(d_id, pnb->diff.input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
+        cudaMemcpyAsync(d_od, pnb->la.output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
+        cudaMemcpyAsync(dPNB, pnb->pnb, pnb->number_of_pnb * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
 
-    for (int i = 0; i < iterations; i++)
-    {
-        seed = seed_by_rank();
+        for (int i = 0; i < iterations; i++) {
+            seed = seed_by_rank();
 
-        compute_bias_of_g_for_random_key_kernel_using_median <<< n_blocks, n_threads, 0, stream >>> (
-                (unsigned long long)seed,
-                pnb->subrounds, pnb->subrounds - pnb->la.output.subround, d_id, d_od, dPNB,
-                pnb->number_of_pnb, n_tests_for_each_thread, pnb->alg_type,
-                d_medians, i, n_blocks, n_threads
-        );
+            compute_bias_of_g_for_random_key_kernel_using_median <<< n_blocks, n_threads, 0, stream >>>(
+                    (unsigned long long) seed,
+                    pnb->subrounds, pnb->subrounds - pnb->la.output.subround, d_id, d_od, dPNB,
+                    pnb->number_of_pnb, n_tests_for_each_thread, pnb->alg_type,
+                    d_medians, i, n_blocks, n_threads
+            );
+        }
+        cudaFree(d_id);
+        cudaFree(d_od);
+        cudaMemcpyAsync(local_medians, d_medians, sizeof(unsigned long long int) * iterations * n_threads * n_blocks,
+                        cudaMemcpyDeviceToHost, stream);
+        cudaFree(d_medians);
+        cudaStreamSynchronize(stream);
+        cudaStreamDestroy(stream);
+        vector<unsigned long long int> v(local_medians, local_medians + iterations * n_threads * n_blocks);
+        v.pop_back();
+        parmed = par::median(v);
+        MPI_Send(&parmed, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+        free(local_medians);
+    } else {
+        MPI_Recv(&parmed, 1, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
-    cudaFree(d_id);
-    cudaFree(d_od);
-    cudaMemcpyAsync(local_medians, d_medians, sizeof(unsigned long long int)*iterations*n_threads*n_blocks, cudaMemcpyDeviceToHost, stream);
-    cudaFree(d_medians);
-    cudaStreamSynchronize(stream);
-    cudaStreamDestroy(stream);
-    vector<unsigned long long int> v(local_medians, local_medians + iterations*n_threads*n_blocks);
-    v.pop_back();
-    auto parmed = par::median(v);
-    free(local_medians);
     pnb->correlation_of_g.correlation_count = parmed;
     ct_compute_and_test_correlation_using_median(&(pnb->correlation_of_g), n_tests_for_each_thread);
+    MPI_Group_free(&world_group);
+    MPI_Group_free(&new_group);
+
+    if (MPI_COMM_NULL != new_comm) {
+        MPI_Comm_free(&new_comm);
+    }
 }
 
 
