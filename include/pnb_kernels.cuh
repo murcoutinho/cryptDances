@@ -44,4 +44,19 @@ void pnb_attack_for_single_bit_differential(
     FILE *output_file
     );
 
+
+void pnb_remove(pnb_t *pnb, int position);
+void pnb_add(pnb_t *pnb, int position);
+void pnb_divide_groups(pnb_t *current, pnb_t *reserve, double threshold);
+
+//This method is the step 2 of the technique proposed in Eurocrypt 2022. 
+//In cryptdances we assume good computational resources. 
+//Therefore, step 3 is ignored, i.e., all bits are selected with step 2.
+void pnb_iteractive_selection(
+    pnb_t *pnb, 
+    double threshold_direct, 
+    uint64_t number_of_trials_for_bias_of_g, 
+    int number_of_bits_selected
+    );
+
 #endif
