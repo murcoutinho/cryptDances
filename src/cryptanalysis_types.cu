@@ -176,6 +176,13 @@ void ct_compute_and_test_correlation(correlation_t *corr)
     corr->is_significant = test_significance_of_correlation(corr->observed, corr->number_of_trials);
 }
 
+void ct_compute_and_test_correlation_using_median(correlation_t *corr, unsigned long long int number_of_threads)
+{
+    corr->observed = ((double)corr->correlation_count) / number_of_threads;
+    corr->observed = 2 * corr->observed - 1;
+    corr->is_significant = test_significance_of_correlation(corr->observed, corr->number_of_trials);
+}
+
 
 void print_latex_linear_relation(linear_approximation_t *lin_approx)
 {

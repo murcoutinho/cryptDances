@@ -86,6 +86,15 @@ uint64_t seed_by_rank()
     return((rand()<<shift) ^ my_rank);
 }
 
+void random_uint64(uint64_t *x)
+{
+    *x = 0;
+    *x |= (rand() ^ my_rank & 0xFFFF);
+    *x |= (((uint64_t)rand()  ^ my_rank& 0xFFFF)) << 16;
+    *x |= ((uint64_t)(rand()  ^ my_rank& 0xFFFF)) << 32;
+    *x |= ((uint64_t)(rand()  ^ my_rank & 0xFFFF)) << 48;
+}
+
 __host__ __device__ void get_difference_from_single_bit(uint32_t diff[STATE_SIZE], int word, int bit)
 {
     memset(diff, 0x00, sizeof(uint32_t) * STATE_SIZE);
