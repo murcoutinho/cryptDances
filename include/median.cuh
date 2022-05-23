@@ -9,9 +9,9 @@ MPI_Comm   new_comm;
 using namespace std;
 template<class T> void split_vec(std::vector<T>& vec, T pivot, std::vector<T>& le, std::vector<T>& gr, std::vector<T>& pi){
 
-    auto m_it1 = std::partition(std::begin(vec), std::end(vec), [pivot](const auto& em){ return em < pivot; });
-    auto m_it2 = std::partition(m_it1, std::end(vec), [pivot](const auto& em){ return em == pivot; });
-    auto m_it3 = std::partition(m_it2, std::end(vec), [pivot](const auto& em){ return !(em > pivot); });
+    auto m_it1 = std::partition(std::begin(vec), std::end(vec), [pivot](const T& em){ return em < pivot; });
+    auto m_it2 = std::partition(m_it1, std::end(vec), [pivot](const T& em){ return em == pivot; });
+    //auto m_it3 = std::partition(m_it2, std::end(vec), [pivot](const T& em){ return !(em > pivot); });
 
     le.assign(std::begin(vec), m_it1);
     pi.assign(m_it1, m_it2);
@@ -21,8 +21,8 @@ template<class T> void split_vec(std::vector<T>& vec, T pivot, std::vector<T>& l
 template<class T>
 std::tuple<typename std::vector<T>::iterator, typename std::vector<T>::iterator>
 split_vec(std::vector<T>& vec, T pivot){
-    auto m_it1 = std::partition(std::begin(vec), std::end(vec), [pivot](const auto& em){ return em < pivot; });
-    auto m_it2 = std::partition(m_it1, std::end(vec), [pivot](const auto& em){ return em == pivot; });
+    auto m_it1 = std::partition(std::begin(vec), std::end(vec), [pivot](const T& em){ return em < pivot; });
+    auto m_it2 = std::partition(m_it1, std::end(vec), [pivot](const T& em){ return em == pivot; });
     //auto m_it3 = std::partition(m_it2, std::end(vec), [pivot](const auto& em){ return !(em > pivot); });
     return {m_it1, m_it2};
 }
@@ -111,8 +111,9 @@ namespace par {
                 } else {
                     MPI_Recv(&pivot, 1, get_mpi_type<T>(), MPI_ANY_SOURCE, 999, new_comm, MPI_STATUSES_IGNORE);
                 }
-
-                auto[lit, pit] = split_vec(x, pivot);
+                auto t = split_vec(x, pivot);
+                auto lit = std::get<0>(t);
+                auto pit = std::get<1>(t);
 
                 size_t le_size = std::distance(std::begin(x), lit),
                         pi_size = std::distance(lit, pit);
