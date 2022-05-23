@@ -93,4 +93,6 @@ int update_single_bit_differentials_from_file(
     differential_t diff[NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
     );
 void random_uint64(uint64_t *x);
+
+void create_folder_if_doesnt_exist(const char *name);
 #endif

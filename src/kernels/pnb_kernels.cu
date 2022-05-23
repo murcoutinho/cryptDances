@@ -288,6 +288,7 @@ void compute_neutrality_vector(pnb_t *pnb, uint64_t number_of_trials)
     }
 }
 
+
 void compute_correlation_of_g(pnb_t *pnb)
 {
     int n_tests_for_each_thread = (1 << 10), n_threads = (1 << 8), n_blocks = (1 << 6);
@@ -459,7 +460,9 @@ void compute_complexity_of_the_attack(pnb_t *pnb)
     {
         N = (sqrt(alpha*log(4)) + 3 * sqrt(1 - bias_of_g * bias_of_g)) / bias_of_g;
         N = N * N;
+        //Note: New formula from euro2020
         tc = get_max(KEY_SIZE_IN_BITS - alpha, m + log2(N));
+        tc = get_max(tc, KEY_SIZE_IN_BITS - m);
 
         if (tc < minTC)
         {
@@ -506,4 +509,75 @@ void pnb_attack_for_single_bit_differential(
 }
 
 
+void pnb_remove(pnb_t *pnb, int position)
+{
+    int count = 0, current;
+    for(int i=0;i<pnb->number_of_pnb;i++)
+    {
+        current = pnb->pnb[i];
+        if(current != position)
+            pnb->pnb[count++] = current;
+    }
+    pnb->number_of_pnb = count;
+}
+
+void pnb_add(pnb_t *pnb, int position)
+{
+    pnb->pnb[pnb->number_of_pnb++] = position;
+}
+
+void pnb_divide_groups(pnb_t *current, pnb_t *reserve, double threshold)
+{
+    int aux[KEY_SIZE_IN_BITS] = {0}, n = current->number_of_pnb;
+    memcpy(aux, current->pnb, current->number_of_pnb*sizeof(int));
+
+    current->number_of_pnb = 0;
+    reserve->number_of_pnb = 0;
+
+    for(int i=0; i< n; i++)
+    {
+        if(current->neutrality_measure[aux[i]] > threshold)
+            current->pnb[current->number_of_pnb++] = aux[i];
+        else
+            reserve->pnb[reserve->number_of_pnb++] = aux[i];
+    }
+}
+
+//This method is the step 2 of the technique proposed in Eurocrypt 2022. 
+//In cryptdances we assume good computational resources. 
+//Therefore, step 3 is ignored, i.e., all bits are selected with step 2.
+void pnb_iteractive_selection(
+    pnb_t *pnb, 
+    double threshold_direct, 
+    uint64_t number_of_trials_for_bias_of_g, 
+    int number_of_bits_selected
+    )
+{
+    pnb_t pnb_reserve = {0};
+    int maxPos = 0;
+    double maxCorrelation = 0;
+
+    pnb->correlation_of_g.number_of_trials = number_of_trials_for_bias_of_g;
+    memcpy(&pnb_reserve, pnb, sizeof(pnb_t));
+    pnb_divide_groups(pnb, &pnb_reserve, threshold_direct);
+
+    for(int n2 = 0; n2<number_of_bits_selected; n2++)
+    {
+        maxPos = 0; maxCorrelation = 0;
+        for(int i=0; i<pnb_reserve.number_of_pnb; i++)
+        {
+            pnb_add(pnb, pnb_reserve.pnb[i]);
+            compute_correlation_of_g(pnb);
+            pnb_remove(pnb, pnb_reserve.pnb[i]);
+            if(fabs(pnb->correlation_of_g.observed) > maxCorrelation)
+            {
+                maxPos = i;
+                maxCorrelation = fabs(pnb->correlation_of_g.observed);
+            }
+        }
+        pnb_add(pnb, pnb_reserve.pnb[maxPos]);
+        pnb_remove(&pnb_reserve, pnb_reserve.pnb[maxPos]);
+        //if(my_rank == 0) {printf("Max is %d\n", maxPos); pnb_print(NULL, *pnb); pnb_print(NULL, pnb_reserve);}
+    }
+}
 
