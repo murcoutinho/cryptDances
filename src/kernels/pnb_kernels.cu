@@ -248,7 +248,7 @@ void compute_neutrality_vector(pnb_t *pnb, uint64_t number_of_trials)
     uint32_t *d_id, *d_od;
     srand_by_rank();
 
-    uint64_t ntest = (1 << 15), nthreads = (1 << 8), numblocks = (1 << 1);
+    uint64_t ntest = (1 << 10), nthreads = (1 << 8), numblocks = (1 << 1);
     uint64_t iterations = number_of_trials/ntest/nthreads/numblocks/(num_procs-1);
     if (iterations % 2 != 0) {
         printf("For now (iterations % 2) should be 0\n");
@@ -289,7 +289,7 @@ void compute_neutrality_vector(pnb_t *pnb, uint64_t number_of_trials)
 }
 
 
-void compute_correlation_of_g(pnb_t *pnb)
+void compute_correlation_of_g_using_mean(pnb_t *pnb)
 {
     int n_tests_for_each_thread = (1 << 10), n_threads = (1 << 8), n_blocks = (1 << 6);
     int executions_per_kernel = n_tests_for_each_thread * n_threads*n_blocks;
@@ -341,7 +341,6 @@ void compute_correlation_of_g(pnb_t *pnb)
 
 void compute_correlation_of_g_using_median(pnb_t *pnb)
 {
-
     MPI_Group world_group;
     MPI_Comm_group(MPI_COMM_WORLD, &world_group);
     int ranks[num_procs];
@@ -356,11 +355,9 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
     //MPI_Comm new_comm;
     MPI_Comm_create_group(MPI_COMM_WORLD, new_group, 0, &new_comm);
 
-
     int n_tests_for_each_thread = (1 << 15), n_threads = (1 << 7), n_blocks = (1 << 7);
     int executions_per_kernel = n_tests_for_each_thread * n_threads*n_blocks;
-    uint64_t iterations;
-    uint64_t result = 0, seed;
+    uint64_t iterations, seed;
     uint32_t *d_id, *d_od, *dPNB;
     unsigned long long int * d_medians;
 
@@ -368,7 +365,7 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
     // TODO:: Consider even num_procs
     iterations = pnb->correlation_of_g.number_of_trials / (executions_per_kernel) / (num_procs - 1);
     if (iterations % 2 != 0) {
-        printf("For now (iterations % 2) should be 0%" PRIu64 "a\n", iterations);
+        printf("For now (iterations % 2) should be 0.\n");
         exit(0);
     }
     unsigned long long parmed;
@@ -425,6 +422,13 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
     }
 }
 
+void compute_correlation_of_g(pnb_t *pnb)
+{
+    if(pnb->statistic_type == STAT_MEAN)
+        compute_correlation_of_g_using_mean(pnb);
+    else
+        compute_correlation_of_g_using_median(pnb);
+}
 
 void get_pnb_list(pnb_t *pnb)
 {
@@ -460,9 +464,10 @@ void compute_complexity_of_the_attack(pnb_t *pnb)
     {
         N = (sqrt(alpha*log(4)) + 3 * sqrt(1 - bias_of_g * bias_of_g)) / bias_of_g;
         N = N * N;
-        //Note: New formula from euro2020
         tc = get_max(KEY_SIZE_IN_BITS - alpha, m + log2(N));
-        tc = get_max(tc, KEY_SIZE_IN_BITS - m);
+
+        //Note: uncomment to get new formula from euro2020
+        //tc = get_max(tc, KEY_SIZE_IN_BITS - m);
 
         if (tc < minTC)
         {
@@ -489,6 +494,7 @@ void pnb_attack_for_single_bit_differential(
     uint64_t number_of_trials_for_neutrality,
     uint64_t number_of_trials_for_bias_of_g,
     int alg_type,
+    int statistic_type,
     FILE *output_file
     )
 {
@@ -496,12 +502,13 @@ void pnb_attack_for_single_bit_differential(
     pnb.subrounds = subrounds;
     pnb.threshold = threshold;
     pnb.alg_type = alg_type;
+    pnb.statistic_type = statistic_type;
     differential_compute_from_single_bit(&pnb.diff, idw, idb, odw, odb, differential_part_subrounds, alg_type);
     la_compute_from_differential(&pnb.la, pnb.diff, linear_part_subrounds);
     compute_neutrality_vector(&pnb, number_of_trials_for_neutrality);
     get_pnb_list(&pnb);
     pnb.correlation_of_g.number_of_trials = number_of_trials_for_bias_of_g;
-    compute_correlation_of_g_using_median(&pnb);
+    compute_correlation_of_g(&pnb);
     compute_complexity_of_the_attack(&pnb);
 
     if(my_rank == 0)

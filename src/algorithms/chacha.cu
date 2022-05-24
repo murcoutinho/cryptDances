@@ -358,20 +358,20 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
 
     expansion exp[4] = {
         {
-            {words[LetterA], words[LetterB], words[LetterC], words[LetterB], words[LetterC] },
-            {0,rotations[1], 0, (rotations[1]-1), 31}, 5, 3, {0}
+            {(uint32_t) words[LetterA],(uint32_t)  words[LetterB],(uint32_t)  words[LetterC],(uint32_t)  words[LetterB],(uint32_t)  words[LetterC] },
+            {0,(uint32_t) rotations[1], 0,(uint32_t)  (rotations[1]-1), 31}, 5, 3, {0}
         },
         {
-            {words[LetterB], words[LetterC]},
-            {rotations[1],0}, 2, 2, {0}
+            {(uint32_t) words[LetterB], (uint32_t) words[LetterC]},
+            {(uint32_t) rotations[1],0}, 2, 2, {0}
         },
         {
-            {words[LetterC], words[LetterD], words[LetterD]},
+            {(uint32_t) words[LetterC],(uint32_t)  words[LetterD],(uint32_t)  words[LetterD]},
             {0,0,31}, 3, 2, {0}
         },
         {
-            {words[LetterA], words[LetterD]},
-            {0,rotations[0]}, 2, 2, {0}
+            {(uint32_t) words[LetterA],(uint32_t)  words[LetterD]},
+            {0,(uint32_t) rotations[0]}, 2, 2, {0}
         }
     };
     

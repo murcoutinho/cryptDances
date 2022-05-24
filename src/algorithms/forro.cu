@@ -329,23 +329,23 @@ __host__ __device__ void forro_get_expansion(expansion e[5], int subround)
     forro_words_of_subround(W, subround);
     expansion exp[5] = {
         {
-            {W[LetterA], W[LetterC], W[LetterC]},
+            {(uint32_t) W[LetterA], (uint32_t) W[LetterC], (uint32_t) W[LetterC]},
             {8,0,31}, 3, 2, {0}
         },
         {
-            {W[LetterB], W[LetterC], W[LetterC], W[LetterD], W[LetterC], W[LetterD]},
+            {(uint32_t) W[LetterB], (uint32_t) W[LetterC], (uint32_t) W[LetterC], (uint32_t) W[LetterD], (uint32_t) W[LetterC], (uint32_t) W[LetterD]},
             {10, 10,0, 0, 31, 31}, 6, 4, {0}
         },
         {
-            {W[LetterC], W[LetterD], W[LetterD], W[LetterE], W[LetterD], W[LetterE]},
+            {(uint32_t) W[LetterC], (uint32_t) W[LetterD],(uint32_t)  W[LetterD],(uint32_t)  W[LetterE],(uint32_t)  W[LetterD],(uint32_t)  W[LetterE]},
             {0,0,27,0,31,31}, 6, 4, {0}
         },
         {
-            {W[LetterD], W[LetterA], W[LetterB], W[LetterA], W[LetterB]},
+            {(uint32_t) W[LetterD],(uint32_t)  W[LetterA],(uint32_t)  W[LetterB],(uint32_t)  W[LetterA],(uint32_t)  W[LetterB]},
             {27,8,0,7,31}, 5, 3, {0}
         },
         {
-            {W[LetterE], W[LetterA], W[LetterB], W[LetterB]},
+            {(uint32_t) W[LetterE],(uint32_t)  W[LetterA],(uint32_t)  W[LetterB],(uint32_t)  W[LetterB]},
             {0,8,0,31}, 4, 3, { {SPECIAL_EXPANSION_EDD, 3} }
         }
     };

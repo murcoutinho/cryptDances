@@ -35,6 +35,7 @@ typedef diff_lin_t linear_approximation_t;
 
 typedef struct{
     int alg_type;
+    int statistic_type;
     int subrounds;
     differential_t diff;
     linear_approximation_t la;

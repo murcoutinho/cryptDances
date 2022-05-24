@@ -2,7 +2,7 @@
 #mpirun -np 17 -hostfile hosts ./papers_computational_results 
 
 CC=/opt/cuda_11.1.1/bin/nvcc
-ARCH=-c -O3 -arch sm_75
+ARCH=-c -O3 -arch sm_75 -std=c++11
 MPIINC=-I/opt/openmpi/include -I/opt/openmpi/include/openmpi
 INCLUDE=$(MPIINC) -I./include -I./include/algorithms
 MPILIB=/opt/openmpi/lib

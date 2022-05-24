@@ -11,6 +11,10 @@
 #include "util.cuh"
 #include "gputimer.cuh"
 #include "algorithms.cuh"
+
+#define STAT_MEAN 0
+#define STAT_MEDIAN 1
+
 /*
 Alg of sec 3.3 of New features of latin dances.
 */
@@ -18,7 +22,6 @@ __global__ void compute_neutrality_kernel(unsigned long long seed, uint32_t enc_
 int IDW, int IDB, int ODW, int ODB, 
 int ntest, unsigned long long *d_result, int alg_type, 
 int r1, int r2, int r3);
-
 
 void compute_correlation_of_g(pnb_t *pnb);
 
@@ -41,6 +44,7 @@ void pnb_attack_for_single_bit_differential(
     uint64_t number_of_trials_for_neutrality,
     uint64_t number_of_trials_for_bias_of_g,
     int alg_type,
+    int statistic_type,
     FILE *output_file
     );
 

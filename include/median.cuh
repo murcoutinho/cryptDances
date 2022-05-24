@@ -24,7 +24,7 @@ split_vec(std::vector<T>& vec, T pivot){
     auto m_it1 = std::partition(std::begin(vec), std::end(vec), [pivot](const T& em){ return em < pivot; });
     auto m_it2 = std::partition(m_it1, std::end(vec), [pivot](const T& em){ return em == pivot; });
     //auto m_it3 = std::partition(m_it2, std::end(vec), [pivot](const auto& em){ return !(em > pivot); });
-    return {m_it1, m_it2};
+    return std::make_tuple(m_it1,m_it2);
 }
 
 template<class T> double nlogn_median(std::vector<T> v){
@@ -61,21 +61,7 @@ namespace par {
     int ws,rk;
     template<class T>
     MPI_Datatype get_mpi_type(){
-        if constexpr (std::is_same<T, float>::value)                    return MPI_FLOAT;
-        if constexpr (std::is_same<T, double>::value)                   return MPI_DOUBLE;
-        if constexpr (std::is_same<T, int>::value)                      return MPI_INT;
-        if constexpr (std::is_same<T, unsigned int>::value)             return MPI_UNSIGNED;
-        if constexpr (std::is_same<T, long>::value)                     return MPI_LONG;
-        if constexpr (std::is_same<T, long int>::value)                 return MPI_LONG_INT;
-        if constexpr (std::is_same<T, long double>::value)              return MPI_LONG_DOUBLE;
-        if constexpr (std::is_same<T, long long>::value)                return MPI_LONG_LONG;
-        if constexpr (std::is_same<T, long long int>::value)            return MPI_LONG_LONG_INT;
-        if constexpr (std::is_same<T, unsigned long>::value)            return MPI_UNSIGNED_LONG;
-        if constexpr (std::is_same<T, unsigned long long>::value)       return MPI_UNSIGNED_LONG_LONG;
-        if constexpr (std::is_same<T, short>::value)                    return MPI_SHORT;
-        if constexpr (std::is_same<T, short int>::value)                return MPI_SHORT_INT;
-        if constexpr (std::is_same<T, char>::value)                     return MPI_CHAR;
-        return MPI_DATATYPE_NULL;
+        return MPI_UNSIGNED_LONG_LONG;
     }
     namespace {
         template<class T>
