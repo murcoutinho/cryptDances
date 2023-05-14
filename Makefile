@@ -1,7 +1,6 @@
 
 #how to run:
-#mpirun -np 17 -hostfile hosts ./papers_computational_results 
-#mpirun -np 2 -hostfile hosts ./crypt_dances_explorer 
+#mpirun -np 17 -hostfile hosts ./build/papers_computational_results 
 
 CC=/usr/local/cuda/bin/nvcc
 ARCH=-c -O3 -arch sm_75 -std=c++11

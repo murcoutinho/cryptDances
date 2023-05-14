@@ -2,6 +2,7 @@
 #include "forro.cuh"
 #include "chacha.cuh"
 #include "salsa.cuh"
+#include "chaskey.cuh"
 
 __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
 {
@@ -17,6 +18,8 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
     switch (type)
     {
     case ALG_TYPE_FORRO:
+        alg->state_size = STATE_SIZE;
+        alg->key_size = KEY_SIZE;
         for (int i = 0; i < 4; i++)
             alg->iv_positions[i] = forro_iv_positions[i];
         for (int i = 0; i < 8; i++)
@@ -42,6 +45,8 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
         break;
 
     case ALG_TYPE_CHACHA:
+        alg->state_size = STATE_SIZE;
+        alg->key_size = KEY_SIZE;
         for (int i = 0; i < 4; i++)
             alg->iv_positions[i] = chacha_iv_positions[i];
         for (int i = 0; i < 8; i++)
@@ -70,6 +75,8 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
         break;
 
     case ALG_TYPE_SALSA:
+        alg->state_size = STATE_SIZE;
+        alg->key_size = KEY_SIZE;
         for (int i = 0; i < 4; i++)
             alg->iv_positions[i] = salsa_iv_positions[i];
         for (int i = 0; i < 8; i++)
@@ -93,6 +100,35 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
         alg->differential_update = &salsa_differential_update;
         alg->name[0] = 'S'; alg->name[1] = 'a'; alg->name[2] = 'l';
         alg->name[3] = 's'; alg->name[4] = 'a'; alg->name[5] = 0;
+        break;
+
+    case ALG_TYPE_CHASKEY:
+        alg->state_size = CHASKEY_STATE_SIZE;
+        alg->key_size = CHASKEY_KEY_SIZE;
+        for (int i = 0; i < 4; i++)
+            alg->iv_positions[i] = i;
+        for (int i = 0; i < CHASKEY_KEY_SIZE; i++)
+            alg->key_positions[i] = i;
+
+        alg->alg_type = ALG_TYPE_CHASKEY;
+        alg->number_of_rounds = CHASKEY_NUMBER_OF_ROUNDS;
+        alg->number_of_subrounds_in_one_round = CHASKEY_NUMBER_OF_SUBROUNDS_IN_EACH_ROUND;
+        alg->init = NULL;
+        alg->rounds = NULL;
+        alg->subrounds = NULL;
+        alg->invert_rounds = NULL;
+        alg->invert_subrounds = NULL;
+        alg->encrypt_rounds = NULL;
+        alg->encrypt_subrounds = NULL;
+        alg->decrypt_rounds = NULL;
+        alg->decrypt_subrounds = NULL;
+        alg->expand_bit = NULL;
+        alg->special_expansion_cases = NULL;
+        alg->get_letter = NULL;
+        alg->differential_update = NULL;
+        alg->name[0] = 'C'; alg->name[1] = 'h'; alg->name[2] = 'a';
+        alg->name[3] = 's'; alg->name[4] = 'k'; alg->name[5] = 'e';
+        alg->name[6] = 'y'; alg->name[7] = 0;
         break;
     default:
         break;

@@ -18,10 +18,10 @@
 #define MIN_LEVEL 34 //We call LEVEL the log2(N), where N is the number of trials when computing a correlation.
 #define MAX_BITS_IN_LIST_OF_BITS 128
 
-#define STATE_SIZE 16
+#define STATE_SIZE 16 //Maximum state size
 #define STATE_SIZE_IN_BYTES (STATE_SIZE * sizeof(uint32_t))
 #define STATE_SIZE_IN_BITS (STATE_SIZE_IN_BYTES * 8 )
-#define KEY_SIZE 8
+#define KEY_SIZE 8 //Maximum key size
 #define KEY_SIZE_IN_BITS (256)
 #define NONCE_SIZE 2
 #define CTR_SIZE 2

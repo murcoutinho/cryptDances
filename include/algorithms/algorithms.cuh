@@ -25,6 +25,8 @@
 
 typedef struct {
     int alg_type;
+    int state_size;
+    int key_size;
     uint32_t key_positions[8];
     uint32_t iv_positions[4];
     int number_of_rounds;
@@ -48,6 +50,7 @@ typedef struct {
 #define ALG_TYPE_CHACHA 0
 #define ALG_TYPE_SALSA 1
 #define ALG_TYPE_FORRO 2
+#define ALG_TYPE_CHASKEY 3
 
 __host__ __device__ void define_alg(algorithm *alg, uint32_t type);
 void get_alg_name(char name[10], int alg_type);
