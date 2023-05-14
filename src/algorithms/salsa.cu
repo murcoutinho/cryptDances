@@ -132,17 +132,17 @@ __host__ __device__  void salsa_invert_rounds(uint32_t state[16], uint32_t round
     }
 }
 
-__host__ __device__  void salsa_subrounds(uint32_t state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
+__host__ __device__  void salsa_subrounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
     salsa_rounds(state, subrounds, last_subround);
 }
 
-__host__ __device__  void salsa_invert_subrounds(uint32_t state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
+__host__ __device__  void salsa_invert_subrounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
     salsa_invert_rounds(state, subrounds, last_subround);
 }
 
-__host__ __device__  void salsa_encrypt_rounds(uint32_t final_state[STATE_SIZE], uint32_t initial_state[STATE_SIZE], uint32_t rounds)
+__host__ __device__  void salsa_encrypt_rounds(uint32_t final_state[MAXIMUM_STATE_SIZE], uint32_t initial_state[MAXIMUM_STATE_SIZE], uint32_t rounds)
 {
     uint32_t x[16];
     uint32_t i;
@@ -151,26 +151,26 @@ __host__ __device__  void salsa_encrypt_rounds(uint32_t final_state[STATE_SIZE],
     for (i = 0; i < 16; ++i) final_state[i] = PLUS(x[i], initial_state[i]);
 }
 
-__host__ __device__  void salsa_encrypt_subrounds(uint32_t final_state[STATE_SIZE], uint32_t initial_state[STATE_SIZE], uint32_t subrounds)
+__host__ __device__  void salsa_encrypt_subrounds(uint32_t final_state[MAXIMUM_STATE_SIZE], uint32_t initial_state[MAXIMUM_STATE_SIZE], uint32_t subrounds)
 {
     salsa_encrypt_rounds(final_state, initial_state, subrounds);
 }
 
-__host__ __device__  void salsa_decrypt_rounds(uint32_t final_state[STATE_SIZE], uint32_t initial_state[STATE_SIZE], 
-    uint32_t intermediate_state[STATE_SIZE], uint32_t rounds, uint32_t last_round)
+__host__ __device__  void salsa_decrypt_rounds(uint32_t final_state[MAXIMUM_STATE_SIZE], uint32_t initial_state[MAXIMUM_STATE_SIZE], 
+    uint32_t intermediate_state[MAXIMUM_STATE_SIZE], uint32_t rounds, uint32_t last_round)
 {
     for (int i = 0; i < 16; ++i) intermediate_state[i] = MINUS(final_state[i], initial_state[i]);
     salsa_invert_rounds(intermediate_state, rounds, last_round);
 }
 
-__host__ __device__  void salsa_decrypt_subrounds(uint32_t final_state[STATE_SIZE], uint32_t initial_state[STATE_SIZE], 
-    uint32_t intermediate_state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
+__host__ __device__  void salsa_decrypt_subrounds(uint32_t final_state[MAXIMUM_STATE_SIZE], uint32_t initial_state[MAXIMUM_STATE_SIZE], 
+    uint32_t intermediate_state[MAXIMUM_STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
     salsa_decrypt_rounds(final_state, initial_state, intermediate_state, subrounds, last_subround);
 }
 
 __host__ __device__ void salsa_differential_update_odd_round(
-    uint32_t diff[STATE_SIZE], 
+    uint32_t diff[MAXIMUM_STATE_SIZE], 
     int *correlation_exponent
     )
 {
@@ -212,7 +212,7 @@ __host__ __device__ void salsa_differential_update_odd_round(
 
 
 __host__ __device__ void salsa_differential_update_even_round(
-    uint32_t diff[STATE_SIZE], 
+    uint32_t diff[MAXIMUM_STATE_SIZE], 
     int *correlation_exponent
     )
 {
@@ -253,7 +253,7 @@ __host__ __device__ void salsa_differential_update_even_round(
 }
 
 __host__ __device__ void salsa_differential_update(
-    uint32_t diff[STATE_SIZE], 
+    uint32_t diff[MAXIMUM_STATE_SIZE], 
     int subrounds,
     int *correlation_exponent
     )

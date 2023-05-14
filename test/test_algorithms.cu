@@ -81,7 +81,7 @@ __device__ void get_values_for_test_vector(uint32_t k[KEY_SIZE], uint32_t nonce[
 __global__ void ker_test_vectors(int *rv, int alg_type)
 {
     uint32_t k[KEY_SIZE] = { 0 }, ctr[CTR_SIZE] = { 0 }, nonce[NONCE_SIZE] = { 0 }, 
-        state[STATE_SIZE] = { 0 }, state_final[STATE_SIZE];
+        state[MAXIMUM_STATE_SIZE] = { 0 }, state_final[MAXIMUM_STATE_SIZE];
     uint8_t encrypt_input[STATE_SIZE_IN_BYTES], test_vector[STATE_SIZE_IN_BYTES];
     algorithm alg;
     int tx = threadIdx.x + blockIdx.x * blockDim.x;
@@ -105,7 +105,7 @@ __global__ void ker_test_vectors(int *rv, int alg_type)
 __global__ void ker_test_round_vs_invert_round(int *rv, int alg_type, curandState *devStates)
 {
     uint32_t k[KEY_SIZE] = { 0 }, ctr[CTR_SIZE] = { 0 }, nonce[NONCE_SIZE] = { 0 }, 
-        state[STATE_SIZE] = { 0 }, state_alt[STATE_SIZE] ={0};
+        state[MAXIMUM_STATE_SIZE] = { 0 }, state_alt[MAXIMUM_STATE_SIZE] ={0};
     algorithm alg;
     int tx = threadIdx.x + blockIdx.x * blockDim.x;
     int forward=0, backward=1;
@@ -139,7 +139,7 @@ __global__ void ker_test_round_vs_invert_round(int *rv, int alg_type, curandStat
 __global__ void ker_test_subround_vs_invert_subround(int *rv, int alg_type, curandState *devStates)
 {
    uint32_t k[KEY_SIZE] = { 0 }, ctr[CTR_SIZE] = { 0 }, nonce[NONCE_SIZE] = { 0 }, 
-        state[STATE_SIZE] = { 0 }, state_alt[STATE_SIZE] ={0};
+        state[MAXIMUM_STATE_SIZE] = { 0 }, state_alt[MAXIMUM_STATE_SIZE] ={0};
     algorithm alg;
     int tx = threadIdx.x + blockIdx.x * blockDim.x;
     int forward=0, backward=1;
@@ -173,7 +173,7 @@ __global__ void ker_test_subround_vs_invert_subround(int *rv, int alg_type, cura
 __global__ void ker_test_round_vs_subround(int *rv, int alg_type, curandState *devStates)
 {
     uint32_t k[KEY_SIZE] = { 0 }, ctr[CTR_SIZE] = { 0 }, nonce[NONCE_SIZE] = { 0 }, 
-        state[STATE_SIZE] = { 0 }, state_alt[STATE_SIZE] ={0};
+        state[MAXIMUM_STATE_SIZE] = { 0 }, state_alt[MAXIMUM_STATE_SIZE] ={0};
     algorithm alg;
     int tx = threadIdx.x + blockIdx.x * blockDim.x;
     int rounds;
@@ -201,8 +201,8 @@ __global__ void ker_test_round_vs_subround(int *rv, int alg_type, curandState *d
 __global__ void ker_test_encrypt_decrypt(int *rv, int alg_type, curandState *devStates)
 {
     uint32_t k[KEY_SIZE] = { 0 }, ctr[CTR_SIZE] = { 0 }, nonce[NONCE_SIZE] = { 0 }, 
-        state[STATE_SIZE] = { 0 }, state_final[STATE_SIZE], inverted[STATE_SIZE],
-        state_final_subrounds[STATE_SIZE], inverted_subrounds[STATE_SIZE];
+        state[MAXIMUM_STATE_SIZE] = { 0 }, state_final[MAXIMUM_STATE_SIZE], inverted[MAXIMUM_STATE_SIZE],
+        state_final_subrounds[MAXIMUM_STATE_SIZE], inverted_subrounds[MAXIMUM_STATE_SIZE];
     algorithm alg;
     int tx = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -233,7 +233,7 @@ __global__ void ker_test_encrypt_decrypt(int *rv, int alg_type, curandState *dev
 __global__ void ker_test_partial_decryption(int *rv, int alg_type, curandState *devStates)
 {
     uint32_t k[KEY_SIZE] = { 0 }, ctr[CTR_SIZE] = { 0 }, nonce[NONCE_SIZE] = { 0 }, 
-        state[STATE_SIZE] = { 0 }, intermediate_state[STATE_SIZE] = { 0 }, state_final[STATE_SIZE], inverted[STATE_SIZE];
+        state[MAXIMUM_STATE_SIZE] = { 0 }, intermediate_state[MAXIMUM_STATE_SIZE] = { 0 }, state_final[MAXIMUM_STATE_SIZE], inverted[MAXIMUM_STATE_SIZE];
     algorithm alg;
     int tx = threadIdx.x + blockIdx.x * blockDim.x, subrounds,subrounds_dec;
 

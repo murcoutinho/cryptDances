@@ -95,16 +95,16 @@ void random_uint64(uint64_t *x)
     *x |= ((uint64_t)(rand()  ^ my_rank & 0xFFFF)) << 48;
 }
 
-__host__ __device__ void get_difference_from_single_bit(uint32_t diff[STATE_SIZE], int word, int bit)
+__host__ __device__ void get_difference_from_single_bit(uint32_t diff[MAXIMUM_STATE_SIZE], int word, int bit)
 {
-    memset(diff, 0x00, sizeof(uint32_t) * STATE_SIZE);
+    memset(diff, 0x00, sizeof(uint32_t) * MAXIMUM_STATE_SIZE);
     diff[word] = 1<<bit;
 }
 
 
-__host__ __device__ void print_state(uint32_t state[STATE_SIZE])
+__host__ __device__ void print_state(uint32_t state[MAXIMUM_STATE_SIZE])
 {
-    for(int i=0;i<STATE_SIZE;i++)
+    for(int i=0;i<MAXIMUM_STATE_SIZE;i++)
     {
         printf("%02X ", state[i]);
         if((i%4) == 3)
@@ -129,10 +129,10 @@ __host__ __device__ void and_array(uint32_t *z, uint32_t *x, uint32_t *y, int si
 }
 
 
-__host__ __device__ uint8_t xor_bits_of_state(uint32_t state[STATE_SIZE])
+__host__ __device__ uint8_t xor_bits_of_state(uint32_t state[MAXIMUM_STATE_SIZE], int size)
 {
     uint32_t x = state[0];
-    for (int i = 1; i < STATE_SIZE; i++)
+    for (int i = 1; i < size; i++)
         x ^= state[i];
 
     x = x ^ (x >> 16);
@@ -142,11 +142,11 @@ __host__ __device__ uint8_t xor_bits_of_state(uint32_t state[STATE_SIZE])
     return ((x ^ (x >> 1)) & 1);
 }
 
-__host__ __device__ void transform_state_to_bits(uint32_t state[STATE_SIZE], uint8_t bits[STATE_SIZE_IN_BITS])
+__host__ __device__ void transform_state_to_bits(uint32_t state[MAXIMUM_STATE_SIZE], uint8_t bits[STATE_SIZE_IN_BITS])
 {
     int i, b;
     int count = 0;
-    for (i = 0; i < STATE_SIZE; i++)
+    for (i = 0; i < MAXIMUM_STATE_SIZE; i++)
     {
         for (b = 0; b < 32; b++)
         {
@@ -170,23 +170,23 @@ __host__ __device__ void update_biases(double bias[STATE_SIZE_IN_BITS], uint32_t
         bias[i] += ((double)result[i]) / N;
 }
 
-__host__ __device__ uint8_t check_parity_of_equation(uint32_t state[STATE_SIZE], uint32_t ODmask[STATE_SIZE])
+__host__ __device__ uint8_t check_parity_of_equation(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t ODmask[MAXIMUM_STATE_SIZE], int size)
 {
-    uint32_t aux[STATE_SIZE];
+    uint32_t aux[MAXIMUM_STATE_SIZE];
 
-    and_array(aux, state, ODmask, STATE_SIZE);
-    return(xor_bits_of_state(aux));
+    and_array(aux, state, ODmask, size);
+    return(xor_bits_of_state(aux, size));
 }
 
-__host__ __device__ uint8_t check_parity_of_linear_relation(uint32_t input_mask[STATE_SIZE], 
-    uint32_t input_state[STATE_SIZE], uint32_t output_mask[STATE_SIZE], uint32_t output_state[STATE_SIZE])
+__host__ __device__ uint8_t check_parity_of_linear_relation(uint32_t input_mask[MAXIMUM_STATE_SIZE], 
+    uint32_t input_state[MAXIMUM_STATE_SIZE], uint32_t output_mask[MAXIMUM_STATE_SIZE], uint32_t output_state[MAXIMUM_STATE_SIZE], int size)
 {
-    uint32_t aux[STATE_SIZE];
+    uint32_t aux[MAXIMUM_STATE_SIZE];
 
-    for (int i = 0; i < STATE_SIZE; i++)
+    for (int i = 0; i < size; i++)
         aux[i] = (input_state[i] & input_mask[i]) ^ (output_state[i] & output_mask[i]);
 
-    return(xor_bits_of_state(aux));
+    return(xor_bits_of_state(aux,size));
 }
 
 
@@ -199,28 +199,28 @@ __device__ int cudaCmp(uint8_t *v1, uint8_t *v2, int len)
     return 0;
 }
 
-__host__ __device__ void set_bit(uint32_t state[STATE_SIZE], uint32_t w, uint32_t bit)
+__host__ __device__ void set_bit(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t w, uint32_t bit)
 {
     state[w] ^= (1 << bit);
 }
 
-__host__ __device__ void set_list_of_bits(uint32_t state[STATE_SIZE], uint32_t *w, uint32_t *bit, uint32_t numberOfBits)
+__host__ __device__ void set_list_of_bits(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t *w, uint32_t *bit, uint32_t numberOfBits)
 {
     for (uint32_t i = 0; i < numberOfBits; i++)
         set_bit(state, w[i], bit[i]);
 }
 
-__host__ __device__  uint8_t get_bit_from_word_and_bit(uint32_t state[STATE_SIZE], uint32_t w, uint32_t bit)
+__host__ __device__  uint8_t get_bit_from_word_and_bit(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t w, uint32_t bit)
 {
     if(bit>31) return 0;
     return((state[w] >> bit) & 1);
 }
 
-__host__ __device__ int hamming_weight_state(uint32_t state[STATE_SIZE])
+__host__ __device__ int hamming_weight_state(uint32_t state[MAXIMUM_STATE_SIZE], int size)
 {
     int hw = 0;
     
-    for (int w = 0; w < STATE_SIZE; w++)
+    for (int w = 0; w < size; w++)
     {
         for (int b = 0; b < 32; b++)
         {
@@ -234,13 +234,17 @@ __host__ __device__ int hamming_weight_state(uint32_t state[STATE_SIZE])
 
 int write_single_bit_differentials_to_file(
     const char *file_name, 
-    differential_t diff[NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
+    differential_t diff[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS],
+    int alg_type
     )
 {
     FILE *p = NULL;
-
+    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t iv_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t number_of_possible_single_bit_differentials = state_size_in_bits * iv_size_in_bits;
+    
     //First check if input is a list of single bit differentials
-    for(int i =0;i<NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS; i++)
+    for(int i =0;i<number_of_possible_single_bit_differentials; i++)
     {
         if(diff[i].input.number_of_bits != 1)
             return RV_ERROR;
@@ -254,7 +258,7 @@ int write_single_bit_differentials_to_file(
 
     fprintf(p, "IDW IDB ODW ODB number_of_trials correlation_count correlation is_significant\n");
 
-    for(int i =0;i<NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS; i++)
+    for(int i =0;i<number_of_possible_single_bit_differentials; i++)
     {
         fprintf(p, "%d %d %d %d ", diff[i].input.words[0], diff[i].input.bits[0],diff[i].output.words[0], diff[i].output.bits[0]);
         fprintf(p, "%" PRIu64 " %" PRIu64 " ", diff[i].correlation.number_of_trials, diff[i].correlation.correlation_count);
@@ -268,12 +272,15 @@ int write_single_bit_differentials_to_file(
 
 int read_single_bit_differentials_from_file(
     const char *file_name, 
-    differential_t diff[NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
+    differential_t diff[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
     )
 {
     FILE *p = NULL;
     char header[200], *pheader = (char *)header;
     size_t header_size = 200;
+    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t iv_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t number_of_possible_single_bit_differentials = state_size_in_bits * iv_size_in_bits;
 
     p = fopen(file_name, "r");
     if(p == NULL)
@@ -281,7 +288,7 @@ int read_single_bit_differentials_from_file(
 
     getline(&pheader, &header_size, p);
 
-    for(int i =0;i<NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS; i++)
+    for(int i =0;i<number_of_possible_single_bit_differentials; i++)
     {
         fscanf(p, "%d %d %d %d %" SCNu64 " %" SCNu64 " %lf %d\n", diff[i].input.words, diff[i].input.bits,
             diff[i].output.words, diff[i].output.bits, &(diff[i].correlation.number_of_trials), &(diff[i].correlation.correlation_count), 
@@ -298,16 +305,19 @@ int read_single_bit_differentials_from_file(
 
 int update_single_bit_differentials_from_file(
     const char *file_name, 
-    differential_t diff[NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
+    differential_t diff[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
     )
 {
     FILE *p = NULL;
     differential_t *old_diff = NULL;
+    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t iv_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t number_of_possible_single_bit_differentials = state_size_in_bits * iv_size_in_bits;
 
     p = fopen(file_name, "r");
     if(p == NULL) return(write_single_bit_differentials_to_file(file_name, diff));
 
-    old_diff = (differential_t * ) malloc(sizeof(differential_t) * NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS);
+    old_diff = (differential_t * ) malloc(sizeof(differential_t) * number_of_possible_single_bit_differentials);
     if(old_diff == NULL)
     {
         fclose(p);
@@ -315,16 +325,16 @@ int update_single_bit_differentials_from_file(
         return RV_ERROR;
     }
 
-    read_single_bit_differentials_from_file(file_name, old_diff);
+    read_single_bit_differentials_from_file(file_name, old_diff, alg_type);
 
-    for(int i=0;i<NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS;i++)
+    for(int i=0;i<number_of_possible_single_bit_differentials;i++)
     {
         diff[i].correlation.correlation_count += old_diff[i].correlation.correlation_count;
         diff[i].correlation.number_of_trials += old_diff[i].correlation.number_of_trials;
         ct_compute_and_test_correlation(&(diff[i].correlation));
     }
 
-    write_single_bit_differentials_to_file(file_name, diff);
+    write_single_bit_differentials_to_file(file_name, diff, alg_type);
     
     fclose(p);
     free(old_diff);

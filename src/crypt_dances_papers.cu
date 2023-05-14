@@ -46,7 +46,7 @@ void forro_5round_linear_approximation(FILE *output_file)
             if(L[i].correlation.is_significant & my_rank == 0)
                 la_print(output_file, L[i]);
         }
-        memcpy(L[i+1].input.mask, L[i].output.mask, sizeof(uint32_t)*STATE_SIZE);
+        memcpy(L[i+1].input.mask, L[i].output.mask, sizeof(uint32_t)*MAXIMUM_STATE_SIZE);
         L[i+1].input.subround = L[i].output.subround;
     }
 }

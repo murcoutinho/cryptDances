@@ -32,7 +32,7 @@ d = MINUS(d, e);
 #define LOAD32_LE(v) (*((uint32_t *) (v)))
 #define STORE32_LE(c,x) (memcpy(c,&x,4))
 
-__host__ __device__ void forro_init(uint32_t state[STATE_SIZE], uint32_t k[KEY_SIZE], uint32_t nonce[NONCE_SIZE], uint32_t ctr[CTR_SIZE])
+__host__ __device__ void forro_init(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t k[KEY_SIZE], uint32_t nonce[NONCE_SIZE], uint32_t ctr[CTR_SIZE])
 {
     const char *constants = "voltadaasabranca";
     state[0] = k[0];
@@ -53,7 +53,7 @@ __host__ __device__ void forro_init(uint32_t state[STATE_SIZE], uint32_t k[KEY_S
     state[15] = U8TO32_LITTLE(constants + 12);
 }
 
-__host__ __device__ void forro_odd_round(uint32_t x[STATE_SIZE])
+__host__ __device__ void forro_odd_round(uint32_t x[MAXIMUM_STATE_SIZE])
 {
     QUARTERROUND(x[0], x[4], x[8], x[12], x[3])
     QUARTERROUND(x[1], x[5], x[9], x[13], x[0])
@@ -61,7 +61,7 @@ __host__ __device__ void forro_odd_round(uint32_t x[STATE_SIZE])
     QUARTERROUND(x[3], x[7], x[11], x[15], x[2])
 }
 
-__host__ __device__ void forro_even_round(uint32_t x[STATE_SIZE])
+__host__ __device__ void forro_even_round(uint32_t x[MAXIMUM_STATE_SIZE])
 {
     QUARTERROUND(x[0], x[5], x[10], x[15], x[3])
     QUARTERROUND(x[1], x[6], x[11], x[12], x[0])
@@ -69,7 +69,7 @@ __host__ __device__ void forro_even_round(uint32_t x[STATE_SIZE])
     QUARTERROUND(x[3], x[4], x[9], x[14], x[2])
 }
 
-__host__ __device__ void forro_invert_odd_round(uint32_t x[STATE_SIZE])
+__host__ __device__ void forro_invert_odd_round(uint32_t x[MAXIMUM_STATE_SIZE])
 {
     INVERT_QUARTERROUND(x[3], x[7], x[11], x[15], x[2])
     INVERT_QUARTERROUND(x[2], x[6], x[10], x[14], x[1])
@@ -77,7 +77,7 @@ __host__ __device__ void forro_invert_odd_round(uint32_t x[STATE_SIZE])
     INVERT_QUARTERROUND(x[0], x[4], x[8], x[12], x[3])
 }
 
-__host__ __device__ void forro_invert_even_round(uint32_t x[STATE_SIZE])
+__host__ __device__ void forro_invert_even_round(uint32_t x[MAXIMUM_STATE_SIZE])
 {
     INVERT_QUARTERROUND(x[3], x[4], x[9], x[14], x[2])
     INVERT_QUARTERROUND(x[2], x[7], x[8], x[13], x[1])
@@ -85,7 +85,7 @@ __host__ __device__ void forro_invert_even_round(uint32_t x[STATE_SIZE])
     INVERT_QUARTERROUND(x[0], x[5], x[10], x[15], x[3])
 }
 
-__host__ __device__ void forro_rounds(uint32_t state[STATE_SIZE], uint32_t rounds, uint32_t last_round)
+__host__ __device__ void forro_rounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t rounds, uint32_t last_round)
 {
     uint32_t i;
 
@@ -97,7 +97,7 @@ __host__ __device__ void forro_rounds(uint32_t state[STATE_SIZE], uint32_t round
     }
 }
 
-__host__ __device__ void forro_invert_rounds(uint32_t state[STATE_SIZE], uint32_t rounds, uint32_t last_round)
+__host__ __device__ void forro_invert_rounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t rounds, uint32_t last_round)
 {
     uint32_t i;
 
@@ -109,7 +109,7 @@ __host__ __device__ void forro_invert_rounds(uint32_t state[STATE_SIZE], uint32_
     }
 }
 
-__host__ __device__ void forro_subrounds(uint32_t state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
+__host__ __device__ void forro_subrounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
     uint32_t i, rounds;
     
@@ -182,7 +182,7 @@ __host__ __device__ void forro_subrounds(uint32_t state[STATE_SIZE], uint32_t su
 
 
 
-__host__ __device__ void forro_invert_subrounds(uint32_t state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
+__host__ __device__ void forro_invert_subrounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
     uint32_t i, rounds;
     
@@ -253,43 +253,43 @@ __host__ __device__ void forro_invert_subrounds(uint32_t state[STATE_SIZE], uint
 }
 
 
-__host__ __device__ void forro_encrypt_rounds(uint32_t final_state[STATE_SIZE], uint32_t initial_state[STATE_SIZE], uint32_t rounds)
+__host__ __device__ void forro_encrypt_rounds(uint32_t final_state[MAXIMUM_STATE_SIZE], uint32_t initial_state[MAXIMUM_STATE_SIZE], uint32_t rounds)
 {
-    uint32_t x[STATE_SIZE];
+    uint32_t x[MAXIMUM_STATE_SIZE];
     uint32_t i;
 
-    for (i = 0; i < STATE_SIZE; ++i) x[i] = initial_state[i];
+    for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = initial_state[i];
     forro_rounds(x, rounds,0);
-    for (i = 0; i < STATE_SIZE; ++i) x[i] = PLUS(x[i], initial_state[i]);
+    for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = PLUS(x[i], initial_state[i]);
 
-    for(i=0; i<STATE_SIZE;i++)
+    for(i=0; i<MAXIMUM_STATE_SIZE;i++)
         U32TO8_LITTLE(final_state+i, x[i]);
 }
 
-__host__ __device__ void forro_encrypt_subrounds(uint32_t final_state[STATE_SIZE], uint32_t initial_state[STATE_SIZE], uint32_t subrounds)
+__host__ __device__ void forro_encrypt_subrounds(uint32_t final_state[MAXIMUM_STATE_SIZE], uint32_t initial_state[MAXIMUM_STATE_SIZE], uint32_t subrounds)
 {
-    uint32_t x[STATE_SIZE];
+    uint32_t x[MAXIMUM_STATE_SIZE];
     uint32_t i;
 
-    for (i = 0; i < STATE_SIZE; ++i) x[i] = initial_state[i];
+    for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = initial_state[i];
     forro_subrounds(x, subrounds, 0);
-    for (i = 0; i < STATE_SIZE; ++i) x[i] = PLUS(x[i], initial_state[i]);
+    for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = PLUS(x[i], initial_state[i]);
 
-    for(i=0; i<STATE_SIZE;i++)
+    for(i=0; i<MAXIMUM_STATE_SIZE;i++)
         U32TO8_LITTLE(final_state+i, x[i]);
 }
 
-__host__ __device__ void forro_decrypt_rounds(uint32_t final_state[STATE_SIZE], uint32_t initial_state[STATE_SIZE], 
-    uint32_t intermediate_state[STATE_SIZE], uint32_t rounds, uint32_t last_round)
+__host__ __device__ void forro_decrypt_rounds(uint32_t final_state[MAXIMUM_STATE_SIZE], uint32_t initial_state[MAXIMUM_STATE_SIZE], 
+    uint32_t intermediate_state[MAXIMUM_STATE_SIZE], uint32_t rounds, uint32_t last_round)
 {
-    for (int i = 0; i < STATE_SIZE; ++i) intermediate_state[i] = MINUS(final_state[i], initial_state[i]);
+    for (int i = 0; i < MAXIMUM_STATE_SIZE; ++i) intermediate_state[i] = MINUS(final_state[i], initial_state[i]);
     forro_invert_rounds(intermediate_state, rounds, last_round);
 }
 
-__host__ __device__ void forro_decrypt_subrounds(uint32_t final_state[STATE_SIZE], uint32_t initial_state[STATE_SIZE], 
-    uint32_t intermediate_state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
+__host__ __device__ void forro_decrypt_subrounds(uint32_t final_state[MAXIMUM_STATE_SIZE], uint32_t initial_state[MAXIMUM_STATE_SIZE], 
+    uint32_t intermediate_state[MAXIMUM_STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
-    for (int i = 0; i < STATE_SIZE; ++i) intermediate_state[i] = MINUS(final_state[i], initial_state[i]);
+    for (int i = 0; i < MAXIMUM_STATE_SIZE; ++i) intermediate_state[i] = MINUS(final_state[i], initial_state[i]);
     forro_invert_subrounds(intermediate_state, subrounds, last_subround);
 }
 

@@ -27,6 +27,7 @@ typedef struct {
     int alg_type;
     int state_size;
     int key_size;
+    int iv_size;
     uint32_t key_positions[8];
     uint32_t iv_positions[4];
     int number_of_rounds;

@@ -18,8 +18,9 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
     switch (type)
     {
     case ALG_TYPE_FORRO:
-        alg->state_size = STATE_SIZE;
+        alg->state_size = MAXIMUM_STATE_SIZE;
         alg->key_size = KEY_SIZE;
+        alg->iv_size = 4;
         for (int i = 0; i < 4; i++)
             alg->iv_positions[i] = forro_iv_positions[i];
         for (int i = 0; i < 8; i++)
@@ -45,8 +46,9 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
         break;
 
     case ALG_TYPE_CHACHA:
-        alg->state_size = STATE_SIZE;
+        alg->state_size = MAXIMUM_STATE_SIZE;
         alg->key_size = KEY_SIZE;
+        alg->iv_size = 4;
         for (int i = 0; i < 4; i++)
             alg->iv_positions[i] = chacha_iv_positions[i];
         for (int i = 0; i < 8; i++)
@@ -75,8 +77,9 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
         break;
 
     case ALG_TYPE_SALSA:
-        alg->state_size = STATE_SIZE;
+        alg->state_size = MAXIMUM_STATE_SIZE;
         alg->key_size = KEY_SIZE;
+        alg->iv_size = 4;
         for (int i = 0; i < 4; i++)
             alg->iv_positions[i] = salsa_iv_positions[i];
         for (int i = 0; i < 8; i++)
@@ -105,6 +108,7 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
     case ALG_TYPE_CHASKEY:
         alg->state_size = CHASKEY_STATE_SIZE;
         alg->key_size = CHASKEY_KEY_SIZE;
+        alg->iv_size = 4;
         for (int i = 0; i < 4; i++)
             alg->iv_positions[i] = i;
         for (int i = 0; i < CHASKEY_KEY_SIZE; i++)
@@ -146,6 +150,13 @@ uint32_t get_state_size(int alg_type)
     algorithm alg;
     define_alg(&alg, alg_type);
     return(alg.state_size)
+}
+
+uint32_t get_iv_size(int alg_type)
+{
+    algorithm alg;
+    define_alg(&alg, alg_type);
+    return(alg.iv_size)
 }
 
 void get_alg_iv_positions(uint32_t iv_positions[4], int alg_type)

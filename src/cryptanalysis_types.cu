@@ -3,7 +3,7 @@
 //Prefix dt stands for "differential type".
 void lob_compute_mask_from_list_of_bits(list_of_bits_t *lob)
 {
-    memset(lob->mask, 0x00, sizeof(uint32_t) * STATE_SIZE);
+    memset(lob->mask, 0x00, sizeof(uint32_t) * MAXIMUM_STATE_SIZE);
     for(int i=0; i<lob->number_of_bits; i++)
         lob->mask[lob->words[i]] |= 1<<(lob->bits[i]);
 }
@@ -12,7 +12,7 @@ int lob_compute_list_of_bits_from_mask(list_of_bits_t *lob)
 {
     lob->number_of_bits = 0;
     
-    for (int w = 0; w < STATE_SIZE; w++)
+    for (int w = 0; w < MAXIMUM_STATE_SIZE; w++)
     {
         for (int b = 0; b < 32; b++)
         {
@@ -20,7 +20,7 @@ int lob_compute_list_of_bits_from_mask(list_of_bits_t *lob)
             {
                 if(lob->number_of_bits == MAX_BITS_IN_LIST_OF_BITS)
                 {
-                    memset(lob->mask, 0x00, sizeof(uint32_t) * STATE_SIZE);
+                    memset(lob->mask, 0x00, sizeof(uint32_t) * MAXIMUM_STATE_SIZE);
                     lob->number_of_bits = 0;
                     return RV_ERROR;
                 }
@@ -197,7 +197,7 @@ void print_latex_linear_relation(linear_approximation_t *lin_approx)
         prob = ((double)lin_approx->correlation.number_of_trials - lin_approx->correlation.correlation_count) / lin_approx->correlation.number_of_trials;
         printf("%f = (1+%f)/2 = \\Pr(", prob, 2 * prob - 1);
     }
-    for (int w = 0; w < STATE_SIZE; w++)
+    for (int w = 0; w < MAXIMUM_STATE_SIZE; w++)
     {
         for (int b = 0; b < 32; b++)
         {
@@ -208,7 +208,7 @@ void print_latex_linear_relation(linear_approximation_t *lin_approx)
     printf(" = & ");
 
     int count = 0;
-    for (int w = 0; w < STATE_SIZE; w++)
+    for (int w = 0; w < MAXIMUM_STATE_SIZE; w++)
     {
         for (int b = 0; b < 32; b++)
         {
@@ -228,7 +228,7 @@ void print_latex_linear_relation(linear_approximation_t *lin_approx)
 
     count = 0;
     int flag = 0;
-    for (int w = 0; w < STATE_SIZE; w++)
+    for (int w = 0; w < MAXIMUM_STATE_SIZE; w++)
     {
         count++;
         if (count == 4)

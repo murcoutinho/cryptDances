@@ -44,9 +44,9 @@ __global__ void compute_neutrality_kernel(
 {
     int word = blockIdx.y, neutral_bit = blockIdx.z, neutral_word;
 
-    uint32_t K[8] = { 0 }, state[STATE_SIZE] = { 0 }, alt_state[STATE_SIZE] = { 0 };
-    uint32_t final_state[STATE_SIZE] = { 0 }, alt_final_state[STATE_SIZE] = { 0 };
-    uint32_t intermediate_state[STATE_SIZE] = { 0 }, alt_intermediate_state[STATE_SIZE] = { 0 }, aux[STATE_SIZE];
+    uint32_t K[8] = { 0 }, state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 };
+    uint32_t final_state[MAXIMUM_STATE_SIZE] = { 0 }, alt_final_state[MAXIMUM_STATE_SIZE] = { 0 };
+    uint32_t intermediate_state[MAXIMUM_STATE_SIZE] = { 0 }, alt_intermediate_state[MAXIMUM_STATE_SIZE] = { 0 }, aux[MAXIMUM_STATE_SIZE];
     uint32_t nonce[2] = { 0 }, ctr[2] = { 0 };
     uint32_t diff, new_diff, neutral_diff;
     int count = 0;
@@ -67,13 +67,13 @@ __global__ void compute_neutrality_kernel(
     {
         GENERATE_KTV();
         alg.init(state, K, nonce, ctr);
-        xor_array(alt_state, state, id, STATE_SIZE);
+        xor_array(alt_state, state, id, MAXIMUM_STATE_SIZE);
         alg.encrypt_subrounds(final_state, state, enc_subrounds);
         alg.encrypt_subrounds(alt_final_state, alt_state, enc_subrounds);
 
         alg.decrypt_subrounds(final_state, state, intermediate_state, dec_subrounds, enc_subrounds);
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
-        xor_array(aux, intermediate_state, alt_intermediate_state, STATE_SIZE);
+        xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
         diff = check_parity_of_equation(aux, od);
 
         state[neutral_word] ^= neutral_diff;
@@ -81,7 +81,7 @@ __global__ void compute_neutrality_kernel(
 
         alg.decrypt_subrounds(final_state, state, intermediate_state, dec_subrounds, enc_subrounds);
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
-        xor_array(aux, intermediate_state, alt_intermediate_state, STATE_SIZE);
+        xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
         new_diff = check_parity_of_equation(aux, od);
         if (diff == new_diff)
             count++;
@@ -100,9 +100,9 @@ __global__ void compute_bias_of_g_for_random_key_kernel(
 {
     algorithm alg;
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    uint32_t k_with_zeros[8] = { 0 }, state[STATE_SIZE] = { 0 }, alt_state[STATE_SIZE] = { 0 };
-    uint32_t final_state[STATE_SIZE] = { 0 }, alt_final_state[STATE_SIZE] = { 0 }, aux[STATE_SIZE];
-    uint32_t intermediate_state[STATE_SIZE] = { 0 }, alt_intermediate_state[STATE_SIZE] = { 0 };
+    uint32_t k_with_zeros[8] = { 0 }, state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 };
+    uint32_t final_state[MAXIMUM_STATE_SIZE] = { 0 }, alt_final_state[MAXIMUM_STATE_SIZE] = { 0 }, aux[MAXIMUM_STATE_SIZE];
+    uint32_t intermediate_state[MAXIMUM_STATE_SIZE] = { 0 }, alt_intermediate_state[MAXIMUM_STATE_SIZE] = { 0 };
     uint32_t nonce[2] = { 0 }, ctr[2] = { 0 };
     curandState_t rng;
     uint32_t f_parity, g_parity;
@@ -134,7 +134,7 @@ __global__ void compute_bias_of_g_for_random_key_kernel(
 
         //compute for f
         alg.init(state, k_rand, nonce, ctr);
-        xor_array(alt_state, state, id_mask, STATE_SIZE);
+        xor_array(alt_state, state, id_mask, MAXIMUM_STATE_SIZE);
 
         alg.encrypt_subrounds(final_state, state, enc_subrounds);
         alg.encrypt_subrounds(alt_final_state, alt_state, enc_subrounds);
@@ -142,18 +142,18 @@ __global__ void compute_bias_of_g_for_random_key_kernel(
         alg.decrypt_subrounds(final_state, state, intermediate_state, dec_subrounds, enc_subrounds);
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
 
-        xor_array(aux, intermediate_state, alt_intermediate_state, STATE_SIZE);
+        xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
         f_parity = check_parity_of_equation(aux, od_mask);
 
         //compute for g
         alg.init(state, k_with_zeros, nonce, ctr);
-        xor_array(alt_state, state, id_mask, STATE_SIZE);
+        xor_array(alt_state, state, id_mask, MAXIMUM_STATE_SIZE);
 
         //use the same final state
         alg.decrypt_subrounds(final_state, state, intermediate_state, dec_subrounds, enc_subrounds);
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
 
-        xor_array(aux, intermediate_state, alt_intermediate_state, STATE_SIZE);
+        xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
         g_parity = check_parity_of_equation(aux, od_mask);
 
         if (f_parity == g_parity)
@@ -173,9 +173,9 @@ __global__ void compute_bias_of_g_for_random_key_kernel_using_median(
 {
     algorithm alg;
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    uint32_t k_with_zeros[8] = { 0 }, state[STATE_SIZE] = { 0 }, alt_state[STATE_SIZE] = { 0 };
-    uint32_t final_state[STATE_SIZE] = { 0 }, alt_final_state[STATE_SIZE] = { 0 }, aux[STATE_SIZE];
-    uint32_t intermediate_state[STATE_SIZE] = { 0 }, alt_intermediate_state[STATE_SIZE] = { 0 };
+    uint32_t k_with_zeros[8] = { 0 }, state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 };
+    uint32_t final_state[MAXIMUM_STATE_SIZE] = { 0 }, alt_final_state[MAXIMUM_STATE_SIZE] = { 0 }, aux[MAXIMUM_STATE_SIZE];
+    uint32_t intermediate_state[MAXIMUM_STATE_SIZE] = { 0 }, alt_intermediate_state[MAXIMUM_STATE_SIZE] = { 0 };
     uint32_t nonce[2] = { 0 }, ctr[2] = { 0 };
     curandState_t rng;
     uint32_t f_parity, g_parity;
@@ -207,7 +207,7 @@ __global__ void compute_bias_of_g_for_random_key_kernel_using_median(
 
         //compute for f
         alg.init(state, k_rand, nonce, ctr);
-        xor_array(alt_state, state, id_mask, STATE_SIZE);
+        xor_array(alt_state, state, id_mask, MAXIMUM_STATE_SIZE);
 
         alg.encrypt_subrounds(final_state, state, enc_subrounds);
         alg.encrypt_subrounds(alt_final_state, alt_state, enc_subrounds);
@@ -215,18 +215,18 @@ __global__ void compute_bias_of_g_for_random_key_kernel_using_median(
         alg.decrypt_subrounds(final_state, state, intermediate_state, dec_subrounds, enc_subrounds);
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
 
-        xor_array(aux, intermediate_state, alt_intermediate_state, STATE_SIZE);
+        xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
         f_parity = check_parity_of_equation(aux, od_mask);
 
         //compute for g
         alg.init(state, k_with_zeros, nonce, ctr);
-        xor_array(alt_state, state, id_mask, STATE_SIZE);
+        xor_array(alt_state, state, id_mask, MAXIMUM_STATE_SIZE);
 
         //use the same final state
         alg.decrypt_subrounds(final_state, state, intermediate_state, dec_subrounds, enc_subrounds);
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
 
-        xor_array(aux, intermediate_state, alt_intermediate_state, STATE_SIZE);
+        xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
         g_parity = check_parity_of_equation(aux, od_mask);
 
         if (f_parity == g_parity)
@@ -259,10 +259,10 @@ void compute_neutrality_vector(pnb_t *pnb, uint64_t number_of_trials)
     {
         cudaSetDevice((my_rank-1)%NUMBER_OF_DEVICES_PER_MACHINE);
         cudaMalloc((void **)&d_results, lenght);
-        cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
-        cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
-        cudaMemcpy(d_id, pnb->diff.input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_od, pnb->la.output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
+        cudaMalloc(&d_id, MAXIMUM_STATE_SIZE * sizeof(uint32_t));
+        cudaMalloc(&d_od, MAXIMUM_STATE_SIZE * sizeof(uint32_t));
+        cudaMemcpy(d_id, pnb->diff.input.mask, MAXIMUM_STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_od, pnb->la.output.mask, MAXIMUM_STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
 
         for (int i = 0; i < iterations; i++)
         {
@@ -307,12 +307,12 @@ void compute_correlation_of_g_using_mean(pnb_t *pnb)
         cudaSetDevice((my_rank-1)%NUMBER_OF_DEVICES_PER_MACHINE);
 
         cudaMalloc(&d_sum_parity, sizeof(unsigned long long int));
-        cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
-        cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
+        cudaMalloc(&d_id, MAXIMUM_STATE_SIZE * sizeof(uint32_t));
+        cudaMalloc(&d_od, MAXIMUM_STATE_SIZE * sizeof(uint32_t));
         cudaMalloc(&dPNB, pnb->number_of_pnb * sizeof(uint32_t));
 
-        cudaMemcpy(d_id, pnb->diff.input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_od, pnb->la.output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_id, pnb->diff.input.mask, MAXIMUM_STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_od, pnb->la.output.mask, MAXIMUM_STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
         cudaMemcpy(dPNB, pnb->pnb, pnb->number_of_pnb * sizeof(uint32_t), cudaMemcpyHostToDevice);
 
         for (int i = 0; i < iterations; i++)
@@ -379,12 +379,12 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
         cudaStreamCreate(&stream);
 
         cudaMalloc(&d_medians, sizeof(unsigned long long int) * iterations * n_threads * n_blocks);
-        cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
-        cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
+        cudaMalloc(&d_id, MAXIMUM_STATE_SIZE * sizeof(uint32_t));
+        cudaMalloc(&d_od, MAXIMUM_STATE_SIZE * sizeof(uint32_t));
         cudaMalloc(&dPNB, pnb->number_of_pnb * sizeof(uint32_t));
 
-        cudaMemcpyAsync(d_id, pnb->diff.input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
-        cudaMemcpyAsync(d_od, pnb->la.output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
+        cudaMemcpyAsync(d_id, pnb->diff.input.mask, MAXIMUM_STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
+        cudaMemcpyAsync(d_od, pnb->la.output.mask, MAXIMUM_STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
         cudaMemcpyAsync(dPNB, pnb->pnb, pnb->number_of_pnb * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
 
         for (int i = 0; i < iterations; i++) {

@@ -6,12 +6,13 @@
 void get_differential_from_position(int position, differential_t *diff)
 {
     uint32_t iv_positions[4];
+    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(diff->alg_type);
 
-    diff->input.words[0] = position/(32*512);
-    position -= diff->input.words[0] * 32 * 512;
+    diff->input.words[0] = position/(32*state_size_in_bits);
+    position -= diff->input.words[0] * 32 * state_size_in_bits;
 
-    diff->input.bits[0] = position/512;
-    position -= diff->input.bits[0] * 512;
+    diff->input.bits[0] = position/state_size_in_bits;
+    position -= diff->input.bits[0] * state_size_in_bits;
 
     diff->output.words[0] = position/32;
     position -= diff->output.words[0] * 32;
@@ -50,37 +51,38 @@ void get_differential_from_position(int position, differential_t *diff)
 __global__ void differential_correlation_exhaustion_kernel(unsigned long long seed, 
 int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long *d_result, int alg_type)
 {
-    uint32_t id[STATE_SIZE] = { 0 };
+    uint32_t id[MAXIMUM_STATE_SIZE] = { 0 };
     algorithm alg;
-    uint32_t observed_od[STATE_SIZE];
+    uint32_t observed_od[MAXIMUM_STATE_SIZE];
     uint8_t observed_od_bits[STATE_SIZE_IN_BITS];
     curandState_t rng;
     int sum[STATE_SIZE_IN_BITS] = { 0 };
-    uint32_t state[STATE_SIZE] = { 0 }, alt_state[STATE_SIZE] = { 0 };
+    uint32_t state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 };
 
     int word = blockIdx.y, bit = blockIdx.z;
     const unsigned long long blockId = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
     const unsigned long long tid = blockId * blockDim.x + threadIdx.x;
 
+    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
 
     //comput id - each block may test a different id
     id[alg.iv_positions[word]] = 1 << bit;
 
-    GENERATE_RANDOM_STATE(state);
+    GENERATE_RANDOM_STATE(state,alg.state_size);
     for (int t = 0; t < n_test_for_each_thread; t++)
     {
-        xor_array(alt_state, state, id, STATE_SIZE);
+        xor_array(alt_state, state, id, MAXIMUM_STATE_SIZE);
         alg.subrounds(state, subrounds,last_subround);
         alg.subrounds(alt_state, subrounds,last_subround);
-        xor_array(observed_od, state, alt_state, STATE_SIZE);
+        xor_array(observed_od, state, alt_state, MAXIMUM_STATE_SIZE);
         transform_state_to_bits(observed_od, observed_od_bits);
         update_result(sum, observed_od_bits);
     }
 
-    for (int i = 0; i < 512; i++)
-        atomicAdd(&d_result[32 * 512 * word + 512 * bit + i], sum[i]);
+    for (int i = 0; i < state_size_in_bits; i++)
+        atomicAdd(&d_result[32 * state_size_in_bits * word + state_size_in_bits * bit + i], sum[i]);
 }
 
 
@@ -90,14 +92,17 @@ uint64_t number_of_trials, const char *out_file_name)
     unsigned long long int *d_results;
     uint64_t numblocks = NUMBER_OF_CUDA_BLOCKS/(4*32);
     uint64_t iterations = number_of_trials / NUMBER_OF_CUDA_THREADS / numblocks / NUMBER_OF_TESTS_PER_THREAD / (num_procs-1);
-    unsigned long long int h_results[NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = { 0 }, seed;
-    uint64_t acc_results[NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = {0}, result[NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = {0};
-    int L = NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS * sizeof(unsigned long long int);
+    unsigned long long int h_results[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = { 0 }, seed;
+    uint64_t acc_results[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = {0}, result[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = {0};
+    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t iv_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t number_of_possible_single_bit_differentials = state_size_in_bits * iv_size_in_bits;
+    int L = number_of_possible_single_bit_differentials * sizeof(unsigned long long int);
 
     srand_by_rank(); //initialize prng with different internal state for each MPI process
 
-    memset(result,0x00,NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS*sizeof(uint64_t));
-    memset(acc_results,0x00,NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS*sizeof(uint64_t));
+    memset(result,0x00,MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS*sizeof(uint64_t));
+    memset(acc_results,0x00,MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS*sizeof(uint64_t));
     
     if (my_rank != 0)
     {
@@ -117,25 +122,25 @@ uint64_t number_of_trials, const char *out_file_name)
 
             cudaMemcpy(h_results, d_results, L, cudaMemcpyDeviceToHost);
 
-            for(int j=0;j<NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS; j++)
+            for(int j=0;j<number_of_possible_single_bit_differentials; j++)
                 acc_results[j]+= (uint64_t) h_results[j];
         }
 
         cudaFree(d_results);
     }
 
-    MPI_Allreduce(&acc_results, &result, NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS, MPI_UINT64_T, MPI_SUM, MPI_COMM_WORLD);	
+    MPI_Allreduce(&acc_results, &result, number_of_possible_single_bit_differentials, MPI_UINT64_T, MPI_SUM, MPI_COMM_WORLD);	
 
     if(my_rank == 0)
     {
         differential_t *diff = NULL;
-        diff = (differential_t * ) malloc(sizeof(differential_t) * NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS);
+        diff = (differential_t * ) malloc(sizeof(differential_t) * number_of_possible_single_bit_differentials);
         if(diff == NULL)
         {
             printf("Not enough memory\n");
             return;
         }
-        for(int position = 0; position < NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS; position++)
+        for(int position = 0; position < number_of_possible_single_bit_differentials; position++)
         {
             memset(&diff[position],0x00, sizeof(differential_t));
             diff[position].alg_type = alg_type;
@@ -169,21 +174,21 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
 {
     algorithm alg;
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    uint32_t state[STATE_SIZE] = { 0 }, alt_state[STATE_SIZE] = { 0 }, observed_od[STATE_SIZE];
+    uint32_t state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 }, observed_od[MAXIMUM_STATE_SIZE] = {0};
     curandState_t rng;
     unsigned long long int sum_parity = 0;
 
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
 
-    GENERATE_RANDOM_STATE(state);
+    GENERATE_RANDOM_STATE(state,alg.state_size);
     for (int t = 0; t < n_test_for_each_thread; t++)
     {	
-        xor_array(alt_state, state, id, STATE_SIZE);
+        xor_array(alt_state, state, id, alg.state_size);
         alg.subrounds(state, subrounds,last_subround);
         alg.subrounds(alt_state, subrounds,last_subround);
-        xor_array(observed_od, state, alt_state, STATE_SIZE);
-        sum_parity += check_parity_of_equation(observed_od, od);
+        xor_array(observed_od, state, alt_state, alg.state_size);
+        sum_parity += check_parity_of_equation(observed_od, od, alg.state_size);
     }
 
     atomicAdd(d_result, sum_parity);
@@ -199,17 +204,17 @@ __global__ void linear_correlation_kernel(unsigned long long seed, int subrounds
 {
     algorithm alg;
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    uint32_t input_state[STATE_SIZE] = { 0 }, output_state[STATE_SIZE] = { 0 };
+    uint32_t input_state[MAXIMUM_STATE_SIZE] = { 0 }, output_state[MAXIMUM_STATE_SIZE] = { 0 };
     curandState_t rng;
     unsigned long long int sum_parity = 0;
 
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
 
-    GENERATE_RANDOM_STATE(output_state);
+    GENERATE_RANDOM_STATE(output_state,alg.state_size);
     for (int t = 0; t < n_test_for_each_thread; t++)
     {
-        for(int i=0;i<STATE_SIZE;i++)
+        for(int i=0;i<alg.state_size;i++)
             input_state[i] = output_state[i];
         alg.subrounds(output_state, subrounds, last_subround);
         sum_parity += check_parity_of_linear_relation(id_mask, input_state, od_mask, output_state);
@@ -239,11 +244,11 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
         cudaSetDevice((my_rank-1)%NUMBER_OF_DEVICES_PER_MACHINE);
  
         cudaMalloc(&d_sum_parity, sizeof(unsigned long long int));
-        cudaMalloc(&d_id, STATE_SIZE * sizeof(uint32_t));
-        cudaMalloc(&d_od, STATE_SIZE * sizeof(uint32_t));
+        cudaMalloc(&d_id, alg->state_size * sizeof(uint32_t));
+        cudaMalloc(&d_od, alg->state_size * sizeof(uint32_t));
 
-        cudaMemcpy(d_id, diff_lin->input.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_od, diff_lin->output.mask, STATE_SIZE * sizeof(uint32_t), cudaMemcpyHostToDevice); 
+        cudaMemcpy(d_id, diff_lin->input.mask, alg->state_size * sizeof(uint32_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_od, diff_lin->output.mask, alg->state_size * sizeof(uint32_t), cudaMemcpyHostToDevice); 
 
         for (int i = 0; i < iterations; i++)
         {

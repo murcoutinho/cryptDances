@@ -11,7 +11,7 @@ int my_rank, num_procs;
 void coutinho_2022_chacha_linear_approximations()
 {
     uint64_t N = 1;
-    uint32_t mask[STATE_SIZE] = {0};
+    uint32_t mask[MAXIMUM_STATE_SIZE] = {0};
     int words[4] = {0,4,8,12};
     linear_approximation_t la = {0};
 
@@ -36,14 +36,14 @@ void coutinho_2022_chacha_linear_approximations()
     double expected[4] = {0.000307, 0.000383, 0.000435, 0.0625};
     for(int g=0; g<4; g++)
     {
-        memset(mask,0x00,STATE_SIZE*sizeof(uint32_t));
+        memset(mask,0x00,MAXIMUM_STATE_SIZE*sizeof(uint32_t));
         for(int i=0; i<4; i++)
             mask[words[i]+g] = 0xFFFFFFFF;
 
         memset(&group_la.output,0x00,sizeof(list_of_bits_t));
         group_la.correlation.expected = expected[g];
         group_la.input.subround = la.output.subround;
-        and_array(group_la.input.mask, mask, la.output.mask, STATE_SIZE);
+        and_array(group_la.input.mask, mask, la.output.mask, MAXIMUM_STATE_SIZE);
         lob_compute_list_of_bits_from_mask(&(group_la.input));
         expand_linear_equation(&group_la, 1);
 
@@ -68,7 +68,7 @@ void coutinho_2022_chacha_linear_approximations()
         expand_linear_equation(&group_la, 1);
 
         group_la.input.subround = la.output.subround;
-        and_array(group_la.input.mask, mask, la.output.mask, STATE_SIZE);
+        and_array(group_la.input.mask, mask, la.output.mask, MAXIMUM_STATE_SIZE);
         lob_compute_list_of_bits_from_mask(&(group_la.input));
 
         compute_differential_or_linear_correlation(&group_la, TYPE_LINEAR);

@@ -4,7 +4,7 @@
 #include "arx_cryptanalysis.cuh"
 
 typedef struct{
-    uint32_t mask[STATE_SIZE];
+    uint32_t mask[MAXIMUM_STATE_SIZE];
     int words[MAX_BITS_IN_LIST_OF_BITS];
     int bits[MAX_BITS_IN_LIST_OF_BITS];
     int subround;

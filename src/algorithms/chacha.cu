@@ -33,7 +33,7 @@ HALF_2_CHACHAQUARTERROUND(a,b,c,d)\
 INVERT_HALF_2_CHACHAQUARTERROUND(a,b,c,d)\
 INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
 
-  __host__ __device__ void chacha_init(uint32_t state[STATE_SIZE], uint32_t k[KEY_SIZE], uint32_t nonce[NONCE_SIZE], uint32_t ctr[CTR_SIZE])
+  __host__ __device__ void chacha_init(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t k[KEY_SIZE], uint32_t nonce[NONCE_SIZE], uint32_t ctr[CTR_SIZE])
 {
     state[0] = U32C(0x61707865);
     state[1] = U32C(0x3320646e);
@@ -53,7 +53,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     state[15] = nonce[1];
 }
 
-  __host__ __device__ void chacha_odd_round(uint32_t x[STATE_SIZE])
+  __host__ __device__ void chacha_odd_round(uint32_t x[MAXIMUM_STATE_SIZE])
 {
     CHACHAQUARTERROUND(x[0], x[4], x[8], x[12])
     CHACHAQUARTERROUND(x[1], x[5], x[9], x[13])
@@ -61,7 +61,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     CHACHAQUARTERROUND(x[3], x[7], x[11], x[15])
 }
 
-  __host__ __device__ void chacha_even_round(uint32_t x[STATE_SIZE])
+  __host__ __device__ void chacha_even_round(uint32_t x[MAXIMUM_STATE_SIZE])
 {
     CHACHAQUARTERROUND(x[0], x[5], x[10], x[15])
     CHACHAQUARTERROUND(x[1], x[6], x[11], x[12])
@@ -69,7 +69,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     CHACHAQUARTERROUND(x[3], x[4], x[9], x[14])
 }
 
-  __host__ __device__ void chacha_invert_odd_round(uint32_t x[STATE_SIZE])
+  __host__ __device__ void chacha_invert_odd_round(uint32_t x[MAXIMUM_STATE_SIZE])
 {
     INVERT_CHACHAQUARTERROUND(x[3], x[7], x[11], x[15])
     INVERT_CHACHAQUARTERROUND(x[2], x[6], x[10], x[14])
@@ -77,7 +77,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     INVERT_CHACHAQUARTERROUND(x[0], x[4], x[8], x[12])
 }
 
-  __host__ __device__ void chacha_invert_even_round(uint32_t x[STATE_SIZE])
+  __host__ __device__ void chacha_invert_even_round(uint32_t x[MAXIMUM_STATE_SIZE])
 {
     INVERT_CHACHAQUARTERROUND(x[3], x[4], x[9], x[14])
     INVERT_CHACHAQUARTERROUND(x[2], x[7], x[8], x[13])
@@ -85,7 +85,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     INVERT_CHACHAQUARTERROUND(x[0], x[5], x[10], x[15])
 }
 
-  __host__ __device__ void chacha_rounds(uint32_t state[STATE_SIZE], uint32_t rounds, uint32_t last_round)
+  __host__ __device__ void chacha_rounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t rounds, uint32_t last_round)
 {
     uint32_t i;
 
@@ -97,7 +97,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     }
 }
 
-  __host__ __device__ void chacha_invert_rounds(uint32_t state[STATE_SIZE], uint32_t rounds, uint32_t last_round)
+  __host__ __device__ void chacha_invert_rounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t rounds, uint32_t last_round)
 {
     uint32_t i;
 
@@ -111,7 +111,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
 
 
 
- __host__ __device__ void chacha_subrounds(uint32_t state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
+ __host__ __device__ void chacha_subrounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
     uint32_t i, rounds;
     
@@ -176,7 +176,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     HALF_1_CHACHAQUARTERROUND(state[3], state[4], state[9], state[14])
 }
 
- __host__ __device__ void chacha_invert_subrounds(uint32_t state[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
+ __host__ __device__ void chacha_invert_subrounds(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
     uint32_t i, rounds;
     
@@ -240,41 +240,41 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     INVERT_HALF_2_CHACHAQUARTERROUND(state[3], state[7], state[11], state[15])
 }
 
-  __host__ __device__ void chacha_encrypt_rounds(uint32_t output[STATE_SIZE], uint32_t input[STATE_SIZE], uint32_t rounds)
+  __host__ __device__ void chacha_encrypt_rounds(uint32_t output[MAXIMUM_STATE_SIZE], uint32_t input[MAXIMUM_STATE_SIZE], uint32_t rounds)
 {
-    uint32_t x[STATE_SIZE];
+    uint32_t x[MAXIMUM_STATE_SIZE];
     uint32_t i;
 
-    for (i = 0; i < STATE_SIZE; ++i) x[i] = input[i];
+    for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = input[i];
     chacha_rounds(x, rounds, 0);
-    for (i = 0; i < STATE_SIZE; ++i) x[i] = PLUS(x[i], input[i]);
+    for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = PLUS(x[i], input[i]);
 
     memcpy(output, x, STATE_SIZE_IN_BYTES);
 }
 
-  __host__ __device__ void chacha_decrypt_rounds(uint32_t output[STATE_SIZE], uint32_t input[STATE_SIZE], 
-    uint32_t intermediate[STATE_SIZE], uint32_t rounds, uint32_t last_round)
+  __host__ __device__ void chacha_decrypt_rounds(uint32_t output[MAXIMUM_STATE_SIZE], uint32_t input[MAXIMUM_STATE_SIZE], 
+    uint32_t intermediate[MAXIMUM_STATE_SIZE], uint32_t rounds, uint32_t last_round)
 {
-    for (int i = 0; i < STATE_SIZE; ++i) intermediate[i] = MINUS(output[i], input[i]);
+    for (int i = 0; i < MAXIMUM_STATE_SIZE; ++i) intermediate[i] = MINUS(output[i], input[i]);
     chacha_invert_rounds(intermediate, rounds, last_round);
 }
 
-  __host__ __device__ void chacha_encrypt_subrounds(uint32_t output[STATE_SIZE], uint32_t input[STATE_SIZE], uint32_t subrounds)
+  __host__ __device__ void chacha_encrypt_subrounds(uint32_t output[MAXIMUM_STATE_SIZE], uint32_t input[MAXIMUM_STATE_SIZE], uint32_t subrounds)
 {
-    uint32_t x[STATE_SIZE];
+    uint32_t x[MAXIMUM_STATE_SIZE];
     uint32_t i;
 
-    for (i = 0; i < STATE_SIZE; ++i) x[i] = input[i];
+    for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = input[i];
     chacha_subrounds(x, subrounds, 0);
-    for (i = 0; i < STATE_SIZE; ++i) x[i] = PLUS(x[i], input[i]);
+    for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = PLUS(x[i], input[i]);
 
     memcpy(output, x, STATE_SIZE_IN_BYTES);
 }
 
-  __host__ __device__ void chacha_decrypt_subrounds(uint32_t output[STATE_SIZE], uint32_t input[STATE_SIZE], 
-    uint32_t intermediate[STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
+  __host__ __device__ void chacha_decrypt_subrounds(uint32_t output[MAXIMUM_STATE_SIZE], uint32_t input[MAXIMUM_STATE_SIZE], 
+    uint32_t intermediate[MAXIMUM_STATE_SIZE], uint32_t subrounds, uint32_t last_subround)
 {
-    for (int i = 0; i < STATE_SIZE; ++i) intermediate[i] = MINUS(output[i], input[i]);
+    for (int i = 0; i < MAXIMUM_STATE_SIZE; ++i) intermediate[i] = MINUS(output[i], input[i]);
     chacha_invert_subrounds(intermediate, subrounds, last_subround);
 }
 
@@ -413,7 +413,7 @@ c = minHwMaxGammaDPA(c, d,correlation_exponent);              \
 b = ROTATE(XOR(b, c), 7);
 
 __host__ __device__ void chacha_differential_update(
-    uint32_t diff[STATE_SIZE], 
+    uint32_t diff[MAXIMUM_STATE_SIZE], 
     int subrounds,
     int *correlation_exponent
     )
