@@ -54,9 +54,9 @@ int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long
     uint32_t id[MAXIMUM_STATE_SIZE] = { 0 };
     algorithm alg;
     uint32_t observed_od[MAXIMUM_STATE_SIZE];
-    uint8_t observed_od_bits[STATE_SIZE_IN_BITS];
+    uint8_t observed_od_bits[MAXIMUM_STATE_SIZE_IN_BITS];
     curandState_t rng;
-    int sum[STATE_SIZE_IN_BITS] = { 0 };
+    int sum[MAXIMUM_STATE_SIZE_IN_BITS] = { 0 };
     uint32_t state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 };
 
     int word = blockIdx.y, bit = blockIdx.z;

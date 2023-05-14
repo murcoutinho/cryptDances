@@ -19,8 +19,8 @@
 #define MAX_BITS_IN_LIST_OF_BITS 128
 
 #define MAXIMUM_STATE_SIZE 16 //Maximum state size
-#define STATE_SIZE_IN_BYTES (STATE_SIZE * sizeof(uint32_t))
-#define STATE_SIZE_IN_BITS (STATE_SIZE_IN_BYTES * 8 )
+#define MAXIMUM_STATE_SIZE_IN_BYTES (MAXIMUM_STATE_SIZE * sizeof(uint32_t))
+#define MAXIMUM_STATE_SIZE_IN_BITS (MAXIMUM_STATE_SIZE_IN_BYTES * 8 )
 #define KEY_SIZE 8 //Maximum key size
 #define KEY_SIZE_IN_BITS (256)
 #define NONCE_SIZE 2

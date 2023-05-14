@@ -50,8 +50,8 @@ __host__ __device__ void xor_array(uint32_t *z, uint32_t *x, uint32_t *y, int si
 __host__ __device__ void and_array(uint32_t *z, uint32_t *x, uint32_t *y, int size);
 __host__ __device__ uint8_t xor_bits_of_state(uint32_t state[MAXIMUM_STATE_SIZE], int size);
 __host__ __device__ void transform_state_to_bits(uint32_t state[MAXIMUM_STATE_SIZE], uint8_t bits[MAXIMUM_STATE_SIZE]);
-__host__ __device__ void update_result(int result[STATE_SIZE_IN_BITS], uint8_t bits[MAXIMUM_STATE_SIZE*8]);
-__host__ __device__ void update_biases(double bias[STATE_SIZE_IN_BITS], uint32_t result[STATE_SIZE_IN_BITS], uint64_t N);
+__host__ __device__ void update_result(int result[MAXIMUM_STATE_SIZE_IN_BITS], uint8_t bits[MAXIMUM_STATE_SIZE*8]);
+__host__ __device__ void update_biases(double bias[MAXIMUM_STATE_SIZE_IN_BITS], uint32_t result[MAXIMUM_STATE_SIZE_IN_BITS], uint64_t N);
 __host__ __device__ uint8_t check_parity_of_equation(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t ODmask[MAXIMUM_STATE_SIZE], int size);
 __host__ __device__ uint8_t check_parity_of_linear_relation(uint32_t inputMask[MAXIMUM_STATE_SIZE], 
     uint32_t inputState[MAXIMUM_STATE_SIZE], uint32_t outputMask[MAXIMUM_STATE_SIZE], uint32_t outputState[MAXIMUM_STATE_SIZE], int size);

@@ -249,7 +249,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     chacha_rounds(x, rounds, 0);
     for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = PLUS(x[i], input[i]);
 
-    memcpy(output, x, STATE_SIZE_IN_BYTES);
+    memcpy(output, x, MAXIMUM_STATE_SIZE_IN_BYTES);
 }
 
   __host__ __device__ void chacha_decrypt_rounds(uint32_t output[MAXIMUM_STATE_SIZE], uint32_t input[MAXIMUM_STATE_SIZE], 
@@ -268,7 +268,7 @@ INVERT_HALF_1_CHACHAQUARTERROUND(a,b,c,d)\
     chacha_subrounds(x, subrounds, 0);
     for (i = 0; i < MAXIMUM_STATE_SIZE; ++i) x[i] = PLUS(x[i], input[i]);
 
-    memcpy(output, x, STATE_SIZE_IN_BYTES);
+    memcpy(output, x, MAXIMUM_STATE_SIZE_IN_BYTES);
 }
 
   __host__ __device__ void chacha_decrypt_subrounds(uint32_t output[MAXIMUM_STATE_SIZE], uint32_t input[MAXIMUM_STATE_SIZE], 

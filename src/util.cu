@@ -142,7 +142,7 @@ __host__ __device__ uint8_t xor_bits_of_state(uint32_t state[MAXIMUM_STATE_SIZE]
     return ((x ^ (x >> 1)) & 1);
 }
 
-__host__ __device__ void transform_state_to_bits(uint32_t state[MAXIMUM_STATE_SIZE], uint8_t bits[STATE_SIZE_IN_BITS])
+__host__ __device__ void transform_state_to_bits(uint32_t state[MAXIMUM_STATE_SIZE], uint8_t bits[MAXIMUM_STATE_SIZE_IN_BITS])
 {
     int i, b;
     int count = 0;
@@ -156,14 +156,14 @@ __host__ __device__ void transform_state_to_bits(uint32_t state[MAXIMUM_STATE_SI
     }
 }
 
-__host__ __device__ void update_result(int result[STATE_SIZE_IN_BITS], uint8_t bits[STATE_SIZE_IN_BITS])
+__host__ __device__ void update_result(int result[MAXIMUM_STATE_SIZE_IN_BITS], uint8_t bits[MAXIMUM_STATE_SIZE_IN_BITS])
 {
     int i;
     for (i = 0; i < 512; i++)
         result[i] += (int)bits[i];
 }
 
-__host__ __device__ void update_biases(double bias[STATE_SIZE_IN_BITS], uint32_t result[STATE_SIZE_IN_BITS], uint64_t N)
+__host__ __device__ void update_biases(double bias[MAXIMUM_STATE_SIZE_IN_BITS], uint32_t result[MAXIMUM_STATE_SIZE_IN_BITS], uint64_t N)
 {
     uint32_t i;
     for (i = 0; i < 512; i++)
