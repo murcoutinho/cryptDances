@@ -104,13 +104,13 @@ int main()
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
     example_differential_correlation();
-    coutinho_2022_chacha_linear_approximations();
+    //coutinho_2022_chacha_linear_approximations();
 
     //The following code was used to find all single bit differentials for 4 rounds of Salsa in order to apply BLE
-    uint64_t number_of_trials = 1;
-    number_of_trials<<=28;
-    compute_all_single_bit_differential_correlation(ALG_TYPE_SALSA, 4, 0, 
-        number_of_trials, "all_single_bit_differentials_for_4_rounds_of_salsa.dat");
+    // uint64_t number_of_trials = 1;
+    // number_of_trials<<=28;
+    // compute_all_single_bit_differential_correlation(ALG_TYPE_SALSA, 4, 0, 
+    //     number_of_trials, "all_single_bit_differentials_for_4_rounds_of_salsa.dat");
 
     MPI_Finalize();
     return 0;
