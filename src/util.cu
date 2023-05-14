@@ -272,7 +272,8 @@ int write_single_bit_differentials_to_file(
 
 int read_single_bit_differentials_from_file(
     const char *file_name, 
-    differential_t diff[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
+    differential_t diff[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS],
+    int alg_type
     )
 {
     FILE *p = NULL;
@@ -305,7 +306,8 @@ int read_single_bit_differentials_from_file(
 
 int update_single_bit_differentials_from_file(
     const char *file_name, 
-    differential_t diff[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS]
+    differential_t diff[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS],
+    int alg_type
     )
 {
     FILE *p = NULL;
@@ -315,7 +317,7 @@ int update_single_bit_differentials_from_file(
     uint32_t number_of_possible_single_bit_differentials = state_size_in_bits * iv_size_in_bits;
 
     p = fopen(file_name, "r");
-    if(p == NULL) return(write_single_bit_differentials_to_file(file_name, diff));
+    if(p == NULL) return(write_single_bit_differentials_to_file(file_name, diff, alg_type));
 
     old_diff = (differential_t * ) malloc(sizeof(differential_t) * number_of_possible_single_bit_differentials);
     if(old_diff == NULL)

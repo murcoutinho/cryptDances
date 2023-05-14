@@ -150,7 +150,7 @@ uint64_t number_of_trials, const char *out_file_name)
             ct_compute_and_test_correlation(&(diff[position].correlation));
         }
 
-        update_single_bit_differentials_from_file(out_file_name, diff);
+        update_single_bit_differentials_from_file(out_file_name, diff, alg_type);
 
         free(diff);
     }
@@ -217,7 +217,7 @@ __global__ void linear_correlation_kernel(unsigned long long seed, int subrounds
         for(int i=0;i<alg.state_size;i++)
             input_state[i] = output_state[i];
         alg.subrounds(output_state, subrounds, last_subround);
-        sum_parity += check_parity_of_linear_relation(id_mask, input_state, od_mask, output_state);
+        sum_parity += check_parity_of_linear_relation(id_mask, input_state, od_mask, output_state, alg.state_size);
     }
 
     atomicAdd(d_result, sum_parity);

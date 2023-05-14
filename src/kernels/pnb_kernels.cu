@@ -74,7 +74,7 @@ __global__ void compute_neutrality_kernel(
         alg.decrypt_subrounds(final_state, state, intermediate_state, dec_subrounds, enc_subrounds);
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
         xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
-        diff = check_parity_of_equation(aux, od);
+        diff = check_parity_of_equation(aux, od, alg.state_size);
 
         state[neutral_word] ^= neutral_diff;
         alt_state[neutral_word] ^= neutral_diff;
@@ -82,7 +82,7 @@ __global__ void compute_neutrality_kernel(
         alg.decrypt_subrounds(final_state, state, intermediate_state, dec_subrounds, enc_subrounds);
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
         xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
-        new_diff = check_parity_of_equation(aux, od);
+        new_diff = check_parity_of_equation(aux, od, alg.state_size);
         if (diff == new_diff)
             count++;
     }
@@ -143,7 +143,7 @@ __global__ void compute_bias_of_g_for_random_key_kernel(
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
 
         xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
-        f_parity = check_parity_of_equation(aux, od_mask);
+        f_parity = check_parity_of_equation(aux, od_mask, alg.state_size);
 
         //compute for g
         alg.init(state, k_with_zeros, nonce, ctr);
@@ -154,7 +154,7 @@ __global__ void compute_bias_of_g_for_random_key_kernel(
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
 
         xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
-        g_parity = check_parity_of_equation(aux, od_mask);
+        g_parity = check_parity_of_equation(aux, od_mask, alg.state_size);
 
         if (f_parity == g_parity)
             sum_parity++;
@@ -216,7 +216,7 @@ __global__ void compute_bias_of_g_for_random_key_kernel_using_median(
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
 
         xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
-        f_parity = check_parity_of_equation(aux, od_mask);
+        f_parity = check_parity_of_equation(aux, od_mask, alg.state_size);
 
         //compute for g
         alg.init(state, k_with_zeros, nonce, ctr);
@@ -227,7 +227,7 @@ __global__ void compute_bias_of_g_for_random_key_kernel_using_median(
         alg.decrypt_subrounds(alt_final_state, alt_state, alt_intermediate_state, dec_subrounds, enc_subrounds);
 
         xor_array(aux, intermediate_state, alt_intermediate_state, MAXIMUM_STATE_SIZE);
-        g_parity = check_parity_of_equation(aux, od_mask);
+        g_parity = check_parity_of_equation(aux, od_mask,alg.state_size);
 
         if (f_parity == g_parity)
             sum_parity++;
