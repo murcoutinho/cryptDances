@@ -6,7 +6,7 @@ CC=/usr/local/cuda/bin/nvcc
 ARCH=-c -O3 -arch sm_75 -std=c++11
 MPIINC=-I/opt/openmpi/include -I/opt/openmpi/include/openmpi
 INCLUDE=$(MPIINC) -I./include -I./include/algorithms
-MPILIB=/usr/local/lib
+MPILIB=/usr/lib
 BASE=src/algorithms/*.cu  src/kernels/*.cu src/util.cu src/cryptanalysis_types.cu src/automatic_linear_expansions.cu
 FLAGS=-lmpi -lopen-rte -lopen-pal -lnsl -lutil -lm
 
