@@ -109,13 +109,12 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
             alg->iv_positions[i] = i;
         for (int i = 0; i < CHASKEY_KEY_SIZE; i++)
             alg->key_positions[i] = i;
-
         alg->alg_type = ALG_TYPE_CHASKEY;
         alg->number_of_rounds = CHASKEY_NUMBER_OF_ROUNDS;
         alg->number_of_subrounds_in_one_round = CHASKEY_NUMBER_OF_SUBROUNDS_IN_EACH_ROUND;
-        alg->init = NULL;
-        alg->rounds = NULL;
-        alg->subrounds = NULL;
+        alg->init = &chaskey_init;
+        alg->rounds = &chaskey_rounds;
+        alg->subrounds = &chaskey_subrounds;
         alg->invert_rounds = NULL;
         alg->invert_subrounds = NULL;
         alg->encrypt_rounds = NULL;
