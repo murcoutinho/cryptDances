@@ -54,5 +54,6 @@ typedef struct {
 
 __host__ __device__ void define_alg(algorithm *alg, uint32_t type);
 void get_alg_name(char name[10], int alg_type);
+uint32_t get_state_size(int alg_type);
 void get_alg_iv_positions(uint32_t iv_positions[4], int alg_type);
 #endif

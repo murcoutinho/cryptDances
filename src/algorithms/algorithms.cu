@@ -141,6 +141,13 @@ void get_alg_name(char name[10], int alg_type)
     strcpy(name, alg.name);
 }
 
+uint32_t get_state_size(int alg_type)
+{
+    algorithm alg;
+    define_alg(&alg, alg_type);
+    return(alg.state_size)
+}
+
 void get_alg_iv_positions(uint32_t iv_positions[4], int alg_type)
 {
     algorithm alg;
