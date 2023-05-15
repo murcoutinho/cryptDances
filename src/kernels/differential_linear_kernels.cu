@@ -232,6 +232,7 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
     unsigned long long int *d_sum_parity;
     uint32_t *d_id, *d_od;
     unsigned long long int local_sum_parity = 0;
+    uint32_t state_size = get_state_size(diff_lin->alg_type);
 
     int subrounds = diff_lin->output.subround - diff_lin->input.subround;
     int last_subround = diff_lin->input.subround;
@@ -244,11 +245,11 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
         cudaSetDevice((my_rank-1)%NUMBER_OF_DEVICES_PER_MACHINE);
  
         cudaMalloc(&d_sum_parity, sizeof(unsigned long long int));
-        cudaMalloc(&d_id, alg->state_size * sizeof(uint32_t));
-        cudaMalloc(&d_od, alg->state_size * sizeof(uint32_t));
+        cudaMalloc(&d_id, state_size * sizeof(uint32_t));
+        cudaMalloc(&d_od, state_size * sizeof(uint32_t));
 
-        cudaMemcpy(d_id, diff_lin->input.mask, alg->state_size * sizeof(uint32_t), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_od, diff_lin->output.mask, alg->state_size * sizeof(uint32_t), cudaMemcpyHostToDevice); 
+        cudaMemcpy(d_id, diff_lin->input.mask, state_size * sizeof(uint32_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_od, diff_lin->output.mask, state_size * sizeof(uint32_t), cudaMemcpyHostToDevice); 
 
         for (int i = 0; i < iterations; i++)
         {
