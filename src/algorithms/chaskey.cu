@@ -47,7 +47,7 @@
 
  __host__ __device__ void chaskey_permute(uint32_t state[CHASKEY_STATE_SIZE])
 {
-  chaskey_rounds(state, CHASKEY_ROUNDS, 0);
+  chaskey_rounds(state, CHASKEY_NUMBER_OF_ROUNDS, 0);
 }
 
 const volatile uint32_t C[2] = { 0x00, 0x87 };
