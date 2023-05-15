@@ -97,13 +97,33 @@ void example_differential_correlation()
         differential_print(NULL, diff);
 }
 
+void example_differential_correlation_chaskey()
+{
+    differential_t diff = {
+            ALG_TYPE_CHASKEY,
+            {{0}, {0},{0},3, 1}, //id
+            {{0}, {0},{13},10,2}, //od
+            {"Test",-0.051708, 0, 0, 0}
+        };
+
+    lob_compute_mask_from_list_of_bits(&(diff.input));
+    lob_compute_mask_from_list_of_bits(&(diff.output));
+    
+    diff.correlation.number_of_trials = 1;
+    diff.correlation.number_of_trials <<= 34;
+    compute_differential_or_linear_correlation(&diff, TYPE_DIFFERENTIAL);
+    if(my_rank == 0)
+        differential_print(NULL, diff);
+}
+
 int main()
 {
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
-    example_differential_correlation();
+    //example_differential_correlation();
+    example_differential_correlation_chaskey();
     //coutinho_2022_chacha_linear_approximations();
 
     //The following code was used to find all single bit differentials for 4 rounds of Salsa in order to apply BLE
