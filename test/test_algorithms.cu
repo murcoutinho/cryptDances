@@ -108,7 +108,7 @@ __global__ void ker_test_vectors(int *rv, int alg_type)
         alg.init(state, k, nonce, ctr);
 
     if(alg_type == ALG_TYPE_CHASKEY) {
-        alg.rounds(state, alg.rounds, 0);
+        alg.rounds(state, alg.number_of_rounds, 0);
         for(int i=0;i<MAXIMUM_STATE_SIZE;i++)
             state_final[i] = state[i];
     }
