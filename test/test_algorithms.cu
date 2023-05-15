@@ -328,8 +328,8 @@ int test_chaskey_on_gpu(curandState *dev_states)
     cudaSetDevice((my_rank-1)%8);
     cudaMalloc((void **)&d_rvs, sizeof(int) * TOTAL_THREADS_TESTS);
 
-    //ker_test_vectors<<<NUMBER_OF_THREADS_TESTS, NUMBER_OF_BLOCKS_TESTS>>>(d_rvs, alg_type);
-    //DETECT_ERROR(results, d_rvs, "ker_test_vectors", name);
+    ker_test_vectors<<<NUMBER_OF_THREADS_TESTS, NUMBER_OF_BLOCKS_TESTS>>>(d_rvs, alg_type);
+    DETECT_ERROR(results, d_rvs, "ker_test_vectors", name);
 
     ker_test_round_vs_subround<<<NUMBER_OF_THREADS_TESTS, NUMBER_OF_BLOCKS_TESTS>>>(d_rvs, alg_type, dev_states);
     DETECT_ERROR(results, d_rvs, "ker_test_round_vs_subround", name);
