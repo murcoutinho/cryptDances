@@ -15,7 +15,7 @@
     c += b; b=ROTL(b, 7); b ^= c; c=ROTL(c,16); \
   } while(0)
 
- __host__ __device__ void chaskey_init(uint32_t *state, uint32_t *state,uint32_t *state,uint32_t *state){void}
+ __host__ __device__ void chaskey_init(uint32_t *state, uint32_t *k,uint32_t *nonce,uint32_t *ctr){}
 
  __host__ __device__ void chaskey_round(uint32_t state[CHASKEY_STATE_SIZE]){
   SR1(state[0],state[1],state[2],state[3]); 
@@ -47,7 +47,7 @@
 
  __host__ __device__ void chaskey_permute(uint32_t state[CHASKEY_STATE_SIZE])
 {
-  chaskey_rounds(state, CHASKEY_ROUNDS);
+  chaskey_rounds(state, CHASKEY_ROUNDS, 0);
 }
 
 const volatile uint32_t C[2] = { 0x00, 0x87 };
@@ -78,8 +78,6 @@ const volatile uint32_t C[2] = { 0x00, 0x87 };
   int i;
   uint8_t *p;
   
-  assert(taglen <= 16);
-
   v[0] = k[0];
   v[1] = k[1];
   v[2] = k[2];
