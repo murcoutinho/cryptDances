@@ -50,9 +50,8 @@
   chaskey_rounds(state, CHASKEY_NUMBER_OF_ROUNDS, 0);
 }
 
-const volatile uint32_t C[2] = { 0x00, 0x87 };
 
-#define TIMESTWO(out,in) \
+#define TIMESTWO(out,in,C) \
   do { \
     out[0] = (in[0] << 1) ^ C[in[3] >> 31]; \
     out[1] = (in[1] << 1) | (in[0] >> 31); \
@@ -61,8 +60,9 @@ const volatile uint32_t C[2] = { 0x00, 0x87 };
   } while(0)
     
  __host__ __device__ void subkeys(uint32_t k1[CHASKEY_KEY_SIZE], uint32_t k2[CHASKEY_KEY_SIZE], const uint32_t k[CHASKEY_KEY_SIZE]) {
-  TIMESTWO(k1,k);
-  TIMESTWO(k2,k1);
+  const uint32_t C[2] = { 0x00, 0x87 };
+  TIMESTWO(k1,k, C);
+  TIMESTWO(k2,k1,C);
 }
 
  __host__ __device__ void chaskey(uint8_t *tag, uint32_t taglen, const uint8_t *m, const uint32_t mlen, const uint32_t k[CHASKEY_KEY_SIZE], const uint32_t k1[CHASKEY_KEY_SIZE], const uint32_t k2[CHASKEY_KEY_SIZE]) {
