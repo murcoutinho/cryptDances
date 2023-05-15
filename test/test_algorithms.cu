@@ -98,24 +98,25 @@ __global__ void ker_test_vectors(int *rv, int alg_type)
     define_alg(&alg, alg_type);
     rv[tx] = RV_ERROR;
 
+    uint32_t state_size_in_bytes = sizeof(uint32_t) * alg.state_size;
+
     get_values_for_test_vector(k, nonce, ctr, encrypt_input, test_vector, alg_type);
 
-    if(alg_type == ALG_TYPE_SALSA)
-        memcpy(state, encrypt_input, MAXIMUM_STATE_SIZE_IN_BYTES);
-    else if(alg_type == ALG_TYPE_CHASKEY)
-        memcpy(state, encrypt_input, 16);
+    if( (alg_type == ALG_TYPE_SALSA) || (alg_type == ALG_TYPE_CHASKEY))
+        memcpy(state, encrypt_input, state_size_in_bytes);
     else
         alg.init(state, k, nonce, ctr);
 
     if(alg_type == ALG_TYPE_CHASKEY) {
         alg.rounds(state, alg.number_of_rounds, 0);
-        for(int i=0;i<MAXIMUM_STATE_SIZE;i++)
+        for(int i=0;i<state_size_in_bytes;i++)
             state_final[i] = state[i];
+            printf("i = %d : %02X ", i, state_final[i]);
     }
     else
         alg.encrypt_rounds(state_final, state, alg.number_of_rounds);
 
-    if (cudaCmp((uint8_t *)state_final, test_vector, MAXIMUM_STATE_SIZE_IN_BYTES) == 0)
+    if (cudaCmp((uint8_t *)state_final, test_vector, state_size_in_bytes) == 0)
         rv[tx] = RV_SUCESS;
 }
 
