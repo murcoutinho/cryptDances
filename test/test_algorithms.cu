@@ -110,8 +110,10 @@ __global__ void ker_test_vectors(int *rv, int alg_type)
     if(alg_type == ALG_TYPE_CHASKEY) {
         alg.rounds(state, alg.number_of_rounds, 0);
         for(int i=0;i<state_size_in_bytes;i++)
+        {
             state_final[i] = state[i];
             printf("i = %d : %02X ", i, state_final[i]);
+        }
     }
     else
         alg.encrypt_rounds(state_final, state, alg.number_of_rounds);
