@@ -38,6 +38,9 @@ __device__ void get_values_for_test_vector(uint32_t k[KEY_SIZE], uint32_t nonce[
     26,110,170,154, 29, 29,150, 26,150, 30,235,249,190,163,251, 48, 69,144, 51, 57, 118, 40,152,157,
     180, 57, 27, 94,107, 42,236, 35, 27,111,114,114, 219,236,232,135,111,155,110, 18, 24,232, 95,158,179, 19, 48,202};
 
+    uint8_t chaskey_in[16] = {0x78, 0x56, 0x34, 0x12, 0x21, 0x43, 0x65, 0x87, 0x44, 0x33, 0x22, 0x11, 0x88, 0x77, 0x66, 0x55}; 
+    uint8_t chaskey_out[16] = {0xba, 0xca, 0x1c, 0xb7, 0xf2, 0x6f, 0x32, 0x88, 0x04, 0x46, 0x98, 0xca, 0x44, 0x15, 0xcd, 0x24}; 
+
     const char *key8 = "minha vida e andar por este pais";
     const char *iv8 = "mostro a";
     const char *count8 = " alegria";
@@ -70,6 +73,12 @@ __device__ void get_values_for_test_vector(uint32_t k[KEY_SIZE], uint32_t nonce[
         for(int i=0;i<MAXIMUM_STATE_SIZE_IN_BYTES;i++)
             test_vector[i] = salsa_test_out[i];
         break;
+    case ALG_TYPE_CHASKEY:
+        for(int i=0;i<16;i++)
+            encrypt_input[i] = chaskey_in[i];
+        for(int i=0;i<16;i++)
+            test_vector[i] = chaskey_out[i];
+        break;
     default:
         break;
     }
@@ -93,6 +102,8 @@ __global__ void ker_test_vectors(int *rv, int alg_type)
 
     if(alg_type == ALG_TYPE_SALSA)
         memcpy(state, encrypt_input, MAXIMUM_STATE_SIZE_IN_BYTES);
+    else if(alg_type == ALG_TYPE_CHASKEY)
+        memcpy(state, encrypt_input, 16);
     else
         alg.init(state, k, nonce, ctr);
 
