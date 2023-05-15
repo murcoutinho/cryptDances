@@ -299,3 +299,31 @@ int test_algorithms_on_gpu(curandState *dev_states, int alg_type)
 
     return RV_SUCESS;
 }
+
+
+//TODO: currently Chaskey only support rounds and subrounds. In the future when other methods are implemented this function should be erased.
+int test_chaskey_on_gpu(curandState *dev_states)
+{
+    int *d_rvs;
+    int results[TOTAL_THREADS_TESTS];
+    char name[10];
+    int alg_type = ALG_TYPE_CHASKEY;
+    
+    get_alg_name(name ,alg_type);
+    
+    if(my_rank == 0)
+        return RV_SUCESS;
+
+    cudaSetDevice((my_rank-1)%8);
+    cudaMalloc((void **)&d_rvs, sizeof(int) * TOTAL_THREADS_TESTS);
+
+    //ker_test_vectors<<<NUMBER_OF_THREADS_TESTS, NUMBER_OF_BLOCKS_TESTS>>>(d_rvs, alg_type);
+    //DETECT_ERROR(results, d_rvs, "ker_test_vectors", name);
+
+    ker_test_round_vs_subround<<<NUMBER_OF_THREADS_TESTS, NUMBER_OF_BLOCKS_TESTS>>>(d_rvs, alg_type, dev_states);
+    DETECT_ERROR(results, d_rvs, "ker_test_round_vs_subround", name);
+
+    cudaFree(d_rvs);
+
+    return RV_SUCESS;
+}

@@ -40,6 +40,7 @@ int main()
     test_algorithms_on_gpu(dev_states, ALG_TYPE_FORRO);
     test_algorithms_on_gpu(dev_states, ALG_TYPE_CHACHA);
     test_algorithms_on_gpu(dev_states, ALG_TYPE_SALSA);
+    test_chaskey_on_gpu(dev_states);
 
     cudaFree(dev_states);
 

@@ -9,6 +9,7 @@
 
 __global__ void ker_test_algorithms(int *rv);
 int test_algorithms_on_gpu(curandState *dev_states, int alg_type);
+int test_chaskey_on_gpu(curandState *dev_states);
 
 #endif
 
