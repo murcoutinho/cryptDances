@@ -138,7 +138,7 @@ __host__ __device__ void define_alg(algorithm *alg, uint32_t type)
     }
 }
 
-__host__ __device__  void get_alg_name(char name[10], int alg_type)
+void get_alg_name(char name[10], int alg_type)
 {
     algorithm alg;
     define_alg(&alg, alg_type);
