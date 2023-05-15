@@ -107,7 +107,13 @@ __global__ void ker_test_vectors(int *rv, int alg_type)
     else
         alg.init(state, k, nonce, ctr);
 
-    alg.encrypt_rounds(state_final, state, alg.number_of_rounds);
+    if(alg_type == ALG_TYPE_CHASKEY) {
+        alg.rounds(state, alg.rounds, 0);
+        for(int i=0;i<MAXIMUM_STATE_SIZE;i++)
+            state_final[i] = state[i];
+    }
+    else
+        alg.encrypt_rounds(state_final, state, alg.number_of_rounds);
 
     if (cudaCmp((uint8_t *)state_final, test_vector, MAXIMUM_STATE_SIZE_IN_BYTES) == 0)
         rv[tx] = RV_SUCESS;
@@ -201,6 +207,12 @@ __global__ void ker_test_round_vs_subround(int *rv, int alg_type, curandState *d
 
     alg.init(state, k, nonce, ctr);
     alg.init(state_alt, k, nonce, ctr);
+
+    if(alg_type == ALG_TYPE_CHASKEY){
+        GENERATE_RANDOM_STATE(state, MAXIMUM_STATE_SIZE);
+        for(int i=0;i<MAXIMUM_STATE_SIZE;i++)
+            state_alt[i] = state[i];
+    }
 
     alg.rounds(state, rounds, 0);
     alg.subrounds(state_alt, rounds * alg.number_of_subrounds_in_one_round, 0);
