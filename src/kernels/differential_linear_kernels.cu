@@ -70,9 +70,9 @@ int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long
     //comput id - each block may test a different id
     id[alg.iv_positions[word]] = 1 << bit;
 
-    GENERATE_RANDOM_STATE(state,alg.state_size);
     for (int t = 0; t < n_test_for_each_thread; t++)
     {
+        GENERATE_RANDOM_STATE(state,alg.state_size);
         xor_array(alt_state, state, id, MAXIMUM_STATE_SIZE);
         alg.subrounds(state, subrounds,last_subround);
         alg.subrounds(alt_state, subrounds,last_subround);
@@ -191,18 +191,18 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
         sum_parity += check_parity_of_equation(observed_od, od, alg.state_size);
     }
 
-    if(tid == 0)
-    {
-        for(int i=0;i<alg.state_size;i++){
-            printf("state[i]=%08X\n", state[i]);
-            printf("seed = %016lx\n", seed);
-            printf("alt_state[i]=%08X\n", alt_state[i]);
-            printf("observed_od[i]=%08X\n", observed_od[i]);
-            printf("id[i]=%08X\n", id[i]);
-            printf("od[i]=%08X\n", od[i]);
-        }
+    // if(tid == 0)
+    // {
+    //     for(int i=0;i<alg.state_size;i++){
+    //         printf("state[i]=%08X\n", state[i]);
+    //         printf("seed = %016lx\n", seed);
+    //         printf("alt_state[i]=%08X\n", alt_state[i]);
+    //         printf("observed_od[i]=%08X\n", observed_od[i]);
+    //         printf("id[i]=%08X\n", id[i]);
+    //         printf("od[i]=%08X\n", od[i]);
+    //     }
 
-    }
+    // }
 
     atomicAdd(d_result, sum_parity);
 }
