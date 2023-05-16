@@ -191,8 +191,16 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
         sum_parity += check_parity_of_equation(observed_od, od, alg.state_size);
     }
 
+    // if(tid == 0)
+    // {
+    //     for(int i=0;i<alg.state_size;i++){
+    //         printf("state[i]=%08X", state);
+    //         printf("state[i]=%08X", alt_state);
+    //     }
+
+    // }
+
     atomicAdd(d_result, sum_parity);
-    printf("nao quebrou. sum_parity = %ld\n", sum_parity);
 }
 
 
