@@ -195,10 +195,11 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
     {
         for(int i=0;i<alg.state_size;i++){
             printf("state[i]=%08X\n", state);
-            printf("alt_state[i]=%08X\n", alt_state);
-            printf("observed_od[i]=%08X\n", observed_od);
-            printf("id[i]=%08X\n", id);
-            printf("od[i]=%08X\n", od);
+            printf("seed = %016lx", seed);
+            //printf("alt_state[i]=%08X\n", alt_state);
+            //printf("observed_od[i]=%08X\n", observed_od);
+            //printf("id[i]=%08X\n", id);
+            //printf("od[i]=%08X\n", od);
         }
 
     }
