@@ -181,9 +181,9 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
 
-    GENERATE_RANDOM_STATE(state,alg.state_size);
     for (int t = 0; t < n_test_for_each_thread; t++)
     {	
+        GENERATE_RANDOM_STATE(state,alg.state_size);
         xor_array(alt_state, state, id, alg.state_size);
         alg.subrounds(state, subrounds,last_subround);
         alg.subrounds(alt_state, subrounds,last_subround);
@@ -191,14 +191,17 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
         sum_parity += check_parity_of_equation(observed_od, od, alg.state_size);
     }
 
-    // if(tid == 0)
-    // {
-    //     for(int i=0;i<alg.state_size;i++){
-    //         printf("state[i]=%08X", state);
-    //         printf("state[i]=%08X", alt_state);
-    //     }
+    if(tid == 0)
+    {
+        for(int i=0;i<alg.state_size;i++){
+            printf("state[i]=%08X\n", state);
+            printf("alt_state[i]=%08X\n", alt_state);
+            printf("observed_od[i]=%08X\n", observed_od);
+            printf("id[i]=%08X\n", id);
+            printf("od[i]=%08X\n", od);
+        }
 
-    // }
+    }
 
     atomicAdd(d_result, sum_parity);
 }
@@ -220,9 +223,9 @@ __global__ void linear_correlation_kernel(unsigned long long seed, int subrounds
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
 
-    GENERATE_RANDOM_STATE(output_state,alg.state_size);
     for (int t = 0; t < n_test_for_each_thread; t++)
     {
+        GENERATE_RANDOM_STATE(output_state,alg.state_size);
         for(int i=0;i<alg.state_size;i++)
             input_state[i] = output_state[i];
         alg.subrounds(output_state, subrounds, last_subround);
