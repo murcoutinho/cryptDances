@@ -115,7 +115,7 @@ uint64_t number_of_trials, const char *out_file_name)
         {
             memset(h_results, 0, L);
             cudaMemcpy(d_results, h_results, L, cudaMemcpyHostToDevice);
-            seed = seed_by_rank(i);
+            seed = seed_by_rank();
 
             differential_correlation_exhaustion_kernel <<<dim3(numblocks, 4, 32), NUMBER_OF_CUDA_THREADS>>> (seed, 
                 subrounds, last_subround, NUMBER_OF_TESTS_PER_THREAD, d_results, alg_type);
@@ -194,12 +194,12 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
     if(tid == 0)
     {
         for(int i=0;i<alg.state_size;i++){
-            printf("state[i]=%08X\n", state);
-            printf("seed = %016lx", seed);
-            //printf("alt_state[i]=%08X\n", alt_state);
-            //printf("observed_od[i]=%08X\n", observed_od);
-            //printf("id[i]=%08X\n", id);
-            //printf("od[i]=%08X\n", od);
+            printf("state[i]=%08X\n", state[i]);
+            printf("seed = %016lx\n", seed);
+            printf("alt_state[i]=%08X\n", alt_state[i]);
+            printf("observed_od[i]=%08X\n", observed_od[i]);
+            printf("id[i]=%08X\n", id[i]);
+            printf("od[i]=%08X\n", od[i]);
         }
 
     }
@@ -266,7 +266,7 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
 
         for (int i = 0; i < iterations; i++)
         {
-            seed = seed_by_rank(i);
+            seed = seed_by_rank();
             local_sum_parity = 0;
             cudaMemcpy(d_sum_parity, &local_sum_parity, 
                 sizeof(unsigned long long int), cudaMemcpyHostToDevice);

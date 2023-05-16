@@ -268,7 +268,7 @@ void compute_neutrality_vector(pnb_t *pnb, uint64_t number_of_trials)
         {
             memset(h_results, 0, lenght);
             cudaMemcpy(d_results, h_results, lenght, cudaMemcpyHostToDevice);
-            seed = seed_by_rank(i);
+            seed = seed_by_rank();
             compute_neutrality_kernel <<< dim3(numblocks, 8, 32), nthreads >>> (seed, pnb->subrounds,
                                                                                 pnb->subrounds-pnb->la.output.subround,
                                                                                 d_id, d_od, ntest, d_results, pnb->alg_type, my_rank, i, nthreads, numblocks, number_of_trials/(num_procs-1));
@@ -317,7 +317,7 @@ void compute_correlation_of_g_using_mean(pnb_t *pnb)
 
         for (int i = 0; i < iterations; i++)
         {
-            seed = seed_by_rank(i);
+            seed = seed_by_rank();
             local_sum_parity = 0;
             cudaMemcpy(d_sum_parity, &local_sum_parity, sizeof(unsigned long long int), cudaMemcpyHostToDevice);
 
@@ -388,7 +388,7 @@ void compute_correlation_of_g_using_median(pnb_t *pnb)
         cudaMemcpyAsync(dPNB, pnb->pnb, pnb->number_of_pnb * sizeof(uint32_t), cudaMemcpyHostToDevice, stream);
 
         for (int i = 0; i < iterations; i++) {
-            seed = seed_by_rank(i);
+            seed = seed_by_rank();
 
             compute_bias_of_g_for_random_key_kernel_using_median <<< n_blocks, n_threads, 0, stream >>>(
                     (unsigned long long) seed,

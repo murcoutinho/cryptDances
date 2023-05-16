@@ -65,7 +65,7 @@ __host__ __device__  uint32_t minHwMaxGammaDPA(uint32_t alpha, uint32_t beta, in
 
 int test_significance_of_correlation(double correlation, uint64_t number_of_trials);
 void srand_by_rank();
-uint64_t seed_by_rank(int iteration);
+uint64_t seed_by_rank();
 __host__ __device__  uint8_t get_bit_from_word_and_bit(uint32_t state[MAXIMUM_STATE_SIZE], uint32_t w, uint32_t bit);
 int write_single_bit_differentials_to_file(
     const char *file_name, 

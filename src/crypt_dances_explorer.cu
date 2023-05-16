@@ -122,7 +122,7 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
-    example_differential_correlation();
+    //example_differential_correlation();
     example_differential_correlation_chaskey();
     //coutinho_2022_chacha_linear_approximations();
 

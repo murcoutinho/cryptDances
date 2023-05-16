@@ -79,14 +79,11 @@ void srand_by_rank()
     srand((unsigned int) (my_rank*time(NULL)));
 }
 
-uint64_t seed_by_rank(int iteration)
+uint64_t seed_by_rank()
 {
     //Guarantees that each MPI process has a different seed
     int shift = 1 + (int) log2((double)num_procs);
-    uint64_t part = (rand()<<shift) ^ my_rank;
-    uint64_t part2 = (uint64_t) iteration;
-    uint64_t result = (part2 << 32)^part;
-    return(result);
+    return((rand()<<shift) ^ my_rank);
 }
 
 void random_uint64(uint64_t *x)
