@@ -115,7 +115,7 @@ uint64_t number_of_trials, const char *out_file_name)
         {
             memset(h_results, 0, L);
             cudaMemcpy(d_results, h_results, L, cudaMemcpyHostToDevice);
-            seed = seed_by_rank();
+            seed = seed_by_rank(i);
 
             differential_correlation_exhaustion_kernel <<<dim3(numblocks, 4, 32), NUMBER_OF_CUDA_THREADS>>> (seed, 
                 subrounds, last_subround, NUMBER_OF_TESTS_PER_THREAD, d_results, alg_type);
@@ -265,7 +265,7 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
 
         for (int i = 0; i < iterations; i++)
         {
-            seed = seed_by_rank();
+            seed = seed_by_rank(i);
             local_sum_parity = 0;
             cudaMemcpy(d_sum_parity, &local_sum_parity, 
                 sizeof(unsigned long long int), cudaMemcpyHostToDevice);
