@@ -101,9 +101,9 @@ void example_differential_correlation_chaskey()
 {
     differential_t diff = {
             ALG_TYPE_CHASKEY,
-            {{0}, {0},{0},3, 1}, //id
-            {{0}, {0},{13},10,0}, //od
-            {"Test",-0.051708, 0, 0, 0}
+            {{0}, {0},{31},3, 1}, //id
+            {{0}, {2},{20},10,0}, //od
+            {"Test",0.0288, 0, 0, 0}
         };
 
     lob_compute_mask_from_list_of_bits(&(diff.input));

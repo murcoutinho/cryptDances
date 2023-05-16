@@ -277,6 +277,7 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
 
     MPI_Allreduce(&local_sum,&result,1,MPI_UINT64_T,MPI_SUM,MPI_COMM_WORLD);   
 
+    printf("%ld %ld" ,diff_lin->correlation.number_of_trials, result);
     diff_lin->correlation.correlation_count = diff_lin->correlation.number_of_trials-result;	
     ct_compute_and_test_correlation(&(diff_lin->correlation));
 }
