@@ -110,7 +110,7 @@ void example_differential_correlation_chaskey()
     lob_compute_mask_from_list_of_bits(&(diff.output));
     
     diff.correlation.number_of_trials = 1;
-    diff.correlation.number_of_trials <<= 34;
+    diff.correlation.number_of_trials <<= 35;
     compute_differential_or_linear_correlation(&diff, TYPE_DIFFERENTIAL);
     if(my_rank == 0)
         differential_print(NULL, diff);
