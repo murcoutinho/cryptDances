@@ -102,7 +102,7 @@ void example_differential_correlation_chaskey()
     differential_t diff = {
             ALG_TYPE_CHASKEY,
             {{0}, {0},{31},3, 1}, //id
-            {{0}, {2},{20},10,1}, //od
+            {{0}, {2},{20},11,1}, //od
             {"Test",0.0288, 0, 0, 0}
         };
 
