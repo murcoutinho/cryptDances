@@ -177,6 +177,7 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
     uint32_t state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 }, observed_od[MAXIMUM_STATE_SIZE] = {0};
     curandState_t rng;
     unsigned long long int sum_parity = 0;
+    printf("aqui\n");
 
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
