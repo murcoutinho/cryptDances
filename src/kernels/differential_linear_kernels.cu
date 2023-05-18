@@ -190,8 +190,9 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
         xor_array(observed_od, state, alt_state, alg.state_size);
         sum_parity += check_parity_of_equation(observed_od, od, alg.state_size);
     }
-    
+
     atomicAdd(d_result, sum_parity);
+    printf("aqui\n");
 }
 
 
