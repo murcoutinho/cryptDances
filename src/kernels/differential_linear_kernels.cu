@@ -63,6 +63,9 @@ int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long
     const unsigned long long blockId = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
     const unsigned long long tid = blockId * blockDim.x + threadIdx.x;
 
+    if(word>0) printf("word %d\n",word);
+    if(bit>15) printf("word %d\n",bit);
+
     uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
