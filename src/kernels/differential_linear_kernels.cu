@@ -106,6 +106,8 @@ uint64_t number_of_trials, const char *out_file_name)
     
     if (my_rank != 0)
     {
+        printf("iterations %d\n",iterations);
+
         cudaSetDevice((my_rank-1)%NUMBER_OF_DEVICES_PER_MACHINE);
 
         cudaMalloc((void **)&d_results, L);
@@ -113,6 +115,7 @@ uint64_t number_of_trials, const char *out_file_name)
 
         for (int i = 0; i < iterations; i++)
         {
+            printf("iteration = %d\n",i);
             memset(h_results, 0, L);
             cudaMemcpy(d_results, h_results, L, cudaMemcpyHostToDevice);
             seed = seed_by_rank();
