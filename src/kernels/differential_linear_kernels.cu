@@ -151,7 +151,7 @@ uint64_t number_of_trials, const char *out_file_name)
             diff[position].correlation.number_of_trials = number_of_trials;
             diff[position].correlation.correlation_count = number_of_trials - result[position];
             ct_compute_and_test_correlation(&(diff[position].correlation));
-            printf("%f\n",diff[position].correlation->observed);
+            printf("%f\n",diff[position].correlation.observed);
         }
 
         update_single_bit_differentials_from_file(out_file_name, diff, alg_type);
