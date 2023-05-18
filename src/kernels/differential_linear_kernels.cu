@@ -63,9 +63,6 @@ int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long
     const unsigned long long blockId = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
     const unsigned long long tid = blockId * blockDim.x + threadIdx.x;
 
-    if(word>0) printf("word %d\n",word);
-    //if(bit>15) printf("bit %d\n",bit);
-
     uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
@@ -82,6 +79,10 @@ int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long
         xor_array(observed_od, state, alt_state, MAXIMUM_STATE_SIZE);
         transform_state_to_bits(observed_od, observed_od_bits);
         update_result(sum, observed_od_bits);
+    }
+
+    if(tid == 0){
+        printf("state_size_in_bits %d\n",state_size_in_bits);
     }
 
     for (int i = 0; i < state_size_in_bits; i++)
@@ -128,6 +129,7 @@ uint64_t number_of_trials, const char *out_file_name)
 
             cudaMemcpy(h_results, d_results, L, cudaMemcpyDeviceToHost);
 
+            printf("number_of_possible_single_bit_differentials = %d\n",number_of_possible_single_bit_differentials);
             for(int j=0;j<number_of_possible_single_bit_differentials; j++)
                 acc_results[j]+= (uint64_t) h_results[j];
         }
