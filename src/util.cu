@@ -239,8 +239,8 @@ int write_single_bit_differentials_to_file(
     )
 {
     FILE *p = NULL;
-    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
-    uint32_t iv_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t state_size_in_bits = get_state_size_in_bits(alg_type);
+    uint32_t iv_size_in_bits = get_iv_size_in_bits(alg_type);
     uint32_t number_of_possible_single_bit_differentials = state_size_in_bits * iv_size_in_bits;
     
     //First check if input is a list of single bit differentials
@@ -279,8 +279,8 @@ int read_single_bit_differentials_from_file(
     FILE *p = NULL;
     char header[200], *pheader = (char *)header;
     size_t header_size = 200;
-    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
-    uint32_t iv_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t state_size_in_bits = get_state_size_in_bits(alg_type);
+    uint32_t iv_size_in_bits = get_iv_size_in_bits(alg_type);
     uint32_t number_of_possible_single_bit_differentials = state_size_in_bits * iv_size_in_bits;
 
     p = fopen(file_name, "r");
@@ -312,8 +312,8 @@ int update_single_bit_differentials_from_file(
 {
     FILE *p = NULL;
     differential_t *old_diff = NULL;
-    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
-    uint32_t iv_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t state_size_in_bits = get_state_size_in_bits(alg_type);
+    uint32_t iv_size_in_bits = get_iv_size_in_bits(alg_type);
     uint32_t number_of_possible_single_bit_differentials = state_size_in_bits * iv_size_in_bits;
 
     p = fopen(file_name, "r");

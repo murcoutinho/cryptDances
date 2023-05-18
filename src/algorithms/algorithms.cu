@@ -159,6 +159,16 @@ __host__ __device__ uint32_t get_iv_size(int alg_type)
     return(alg.iv_size);
 }
 
+__host__ __device__ uint32_t get_state_size_in_bits(int alg_type)
+{
+    return(8*sizeof(uint32_t)*get_state_size(alg_type));
+}
+
+__host__ __device__ uint32_t get_iv_size_in_bits(int alg_type)
+{
+    return(8*sizeof(uint32_t)*get_iv_size(alg_type));
+}
+
 __host__ __device__ void get_alg_iv_positions(uint32_t iv_positions[4], int alg_type)
 {
     algorithm alg;

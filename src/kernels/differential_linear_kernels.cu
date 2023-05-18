@@ -6,7 +6,7 @@
 void get_differential_from_position(int position, differential_t *diff)
 {
     uint32_t iv_positions[4];
-    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(diff->alg_type);
+    uint32_t state_size_in_bits = get_state_size_in_bits(diff->alg_type);
 
     diff->input.words[0] = position/(32*state_size_in_bits);
     position -= diff->input.words[0] * 32 * state_size_in_bits;
@@ -63,7 +63,7 @@ int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long
     const unsigned long long blockId = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
     const unsigned long long tid = blockId * blockDim.x + threadIdx.x;
 
-    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t state_size_in_bits = get_state_size_in_bits(alg_type);
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
 
@@ -98,8 +98,8 @@ uint64_t number_of_trials, const char *out_file_name)
     uint64_t iterations = number_of_trials / NUMBER_OF_CUDA_THREADS / numblocks / NUMBER_OF_TESTS_PER_THREAD / (num_procs-1);
     unsigned long long int h_results[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = { 0 }, seed;
     uint64_t acc_results[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = {0}, result[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = {0};
-    uint32_t state_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
-    uint32_t iv_size_in_bits = sizeof(uint32_t)*get_state_size(alg_type);
+    uint32_t state_size_in_bits = get_state_size_in_bits(alg_type);
+    uint32_t iv_size_in_bits = get_iv_size_in_bits(alg_type);
     uint32_t number_of_possible_single_bit_differentials = state_size_in_bits * iv_size_in_bits;
     int L = number_of_possible_single_bit_differentials * sizeof(unsigned long long int);
 
