@@ -172,7 +172,6 @@ uint64_t number_of_trials, const char *out_file_name)
 __global__ void differential_correlation_kernel(unsigned long long seed, int subrounds, int last_subround, uint32_t *id,
     uint32_t *od, int n_test_for_each_thread, unsigned long long int *d_result, int alg_type)
 {
-    printf("da praia");
     algorithm alg;
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
     uint32_t state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 }, observed_od[MAXIMUM_STATE_SIZE] = {0};
@@ -259,7 +258,6 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
             cudaMemcpy(d_sum_parity, &local_sum_parity, 
                 sizeof(unsigned long long int), cudaMemcpyHostToDevice);
 
-            printf("Na beira\n");
             if(type == TYPE_DIFFERENTIAL)
                 differential_correlation_kernel <<< NUMBER_OF_CUDA_BLOCKS, NUMBER_OF_CUDA_THREADS >>> ((unsigned long long)seed, 
                     subrounds, last_subround, d_id, d_od, NUMBER_OF_TESTS_PER_THREAD, d_sum_parity, diff_lin->alg_type);
