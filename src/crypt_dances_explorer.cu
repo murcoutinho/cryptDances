@@ -123,7 +123,7 @@ int main()
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
     //example_differential_correlation();
-    example_differential_correlation_chaskey();
+    //example_differential_correlation_chaskey();
     //coutinho_2022_chacha_linear_approximations();
 
     //The following code was used to find all single bit differentials from 1.5 to 5 rounds of Chaskey
