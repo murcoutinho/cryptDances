@@ -177,7 +177,6 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
     uint32_t state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 }, observed_od[MAXIMUM_STATE_SIZE] = {0};
     curandState_t rng;
     unsigned long long int sum_parity = 0;
-    printf("aqui\n");
 
     define_alg(&alg, alg_type);
     curand_init(seed, tid, 0, &rng);
@@ -193,7 +192,6 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
     }
 
     atomicAdd(d_result, sum_parity);
-    printf("aqui\n");
 }
 
 
@@ -242,6 +240,7 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
     srand_by_rank(); //initialize prng with different internal state for each MPI process
     iterations = diff_lin->correlation.number_of_trials / TOTAL_EXECUTIONS_PER_KERNEL / (num_procs-1);
     
+    printf("SEra??");
     if (my_rank != 0)
     {
         cudaSetDevice((my_rank-1)%NUMBER_OF_DEVICES_PER_MACHINE);
@@ -253,6 +252,7 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
         cudaMemcpy(d_id, diff_lin->input.mask, state_size * sizeof(uint32_t), cudaMemcpyHostToDevice);
         cudaMemcpy(d_od, diff_lin->output.mask, state_size * sizeof(uint32_t), cudaMemcpyHostToDevice); 
 
+        printf("sera 2");
         for (int i = 0; i < iterations; i++)
         {
             seed = seed_by_rank();
