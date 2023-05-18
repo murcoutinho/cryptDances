@@ -275,7 +275,6 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
         cudaFree(d_od);
     }
 
-    printf("local sum = %ld\n", local_sum);
     MPI_Allreduce(&local_sum,&result,1,MPI_UINT64_T,MPI_SUM,MPI_COMM_WORLD);   
 
     diff_lin->correlation.correlation_count = diff_lin->correlation.number_of_trials-result;	
