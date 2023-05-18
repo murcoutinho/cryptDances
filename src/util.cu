@@ -262,7 +262,7 @@ int write_single_bit_differentials_to_file(
     {
         fprintf(p, "%d %d %d %d ", diff[i].input.words[0], diff[i].input.bits[0],diff[i].output.words[0], diff[i].output.bits[0]);
         fprintf(p, "%" PRIu64 " %" PRIu64 " ", diff[i].correlation.number_of_trials, diff[i].correlation.correlation_count);
-        fprintf(p, "%f %d\n", diff[i].correlation, diff[i].correlation.is_significant);
+        fprintf(p, "%.15f %d\n", diff[i].correlation.observed, diff[i].correlation.is_significant);
     }
 
     fclose(p);
