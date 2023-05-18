@@ -81,10 +81,6 @@ int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long
         update_result(sum, observed_od_bits);
     }
 
-    if(tid == 0){
-        printf("state_size_in_bits %d\n",state_size_in_bits);
-    }
-
     for (int i = 0; i < state_size_in_bits; i++)
         atomicAdd(&d_result[32 * state_size_in_bits * word + state_size_in_bits * bit + i], sum[i]);
 }
@@ -129,7 +125,6 @@ uint64_t number_of_trials, const char *out_file_name)
 
             cudaMemcpy(h_results, d_results, L, cudaMemcpyDeviceToHost);
 
-            printf("number_of_possible_single_bit_differentials = %d\n",number_of_possible_single_bit_differentials);
             for(int j=0;j<number_of_possible_single_bit_differentials; j++)
                 acc_results[j]+= (uint64_t) h_results[j];
         }
@@ -156,6 +151,7 @@ uint64_t number_of_trials, const char *out_file_name)
             diff[position].correlation.number_of_trials = number_of_trials;
             diff[position].correlation.correlation_count = number_of_trials - result[position];
             ct_compute_and_test_correlation(&(diff[position].correlation));
+            printf("%f\n",diff[position].correlation->observed);
         }
 
         update_single_bit_differentials_from_file(out_file_name, diff, alg_type);
