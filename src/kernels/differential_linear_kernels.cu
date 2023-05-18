@@ -190,20 +190,7 @@ __global__ void differential_correlation_kernel(unsigned long long seed, int sub
         xor_array(observed_od, state, alt_state, alg.state_size);
         sum_parity += check_parity_of_equation(observed_od, od, alg.state_size);
     }
-
-    // if(tid == 0)
-    // {
-    //     for(int i=0;i<alg.state_size;i++){
-    //         printf("state[i]=%08X\n", state[i]);
-    //         printf("seed = %016lx\n", seed);
-    //         printf("alt_state[i]=%08X\n", alt_state[i]);
-    //         printf("observed_od[i]=%08X\n", observed_od[i]);
-    //         printf("id[i]=%08X\n", id[i]);
-    //         printf("od[i]=%08X\n", od[i]);
-    //     }
-
-    // }
-
+    
     atomicAdd(d_result, sum_parity);
 }
 
