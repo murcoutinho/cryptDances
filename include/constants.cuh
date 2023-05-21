@@ -12,7 +12,6 @@
 #define NUMBER_OF_TESTS_PER_THREAD (1<<15)//(1<<15) 
 #define NUMBER_OF_CUDA_THREADS (1<<10) //(1<<8)
 #define NUMBER_OF_CUDA_BLOCKS (1<<10) //Must be >= (1<<7)!!!
-#define TOTAL_EXECUTIONS_PER_KERNEL (NUMBER_OF_TESTS_PER_THREAD * NUMBER_OF_CUDA_THREADS * NUMBER_OF_CUDA_BLOCKS)
 
 #define MAX_LEVEL 38 //We call LEVEL the log2(N), where N is the number of trials when computing a correlation.
 #define MIN_LEVEL 30 //We call LEVEL the log2(N), where N is the number of trials when computing a correlation.

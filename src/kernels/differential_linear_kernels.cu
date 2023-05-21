@@ -254,7 +254,10 @@ void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type)
     int last_subround = diff_lin->input.subround;
     
     srand_by_rank(); //initialize prng with different internal state for each MPI process
-    iterations = diff_lin->correlation.number_of_trials / TOTAL_EXECUTIONS_PER_KERNEL / (num_procs-1);
+    iterations = diff_lin->correlation.number_of_trials / (num_procs-1);
+    iterations /= (uint64_t) NUMBER_OF_CUDA_BLOCKS;
+    iterations /= (uint64_t) NUMBER_OF_CUDA_THREADS;
+    iterations /= (uint64_t) NUMBER_OF_TESTS_PER_THREAD;
     
     if (my_rank != 0)
     {
