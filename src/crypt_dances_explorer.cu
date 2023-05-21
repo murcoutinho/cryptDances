@@ -111,7 +111,7 @@ void example_differential_correlation_chaskey()
     
     diff.correlation.number_of_trials = 1;
     diff.correlation.number_of_trials <<= 35;
-    compute_differential_or_linear_correlation(&diff, TYPE_DIFFERENTIAL);
+    search_until_find_correlation(&diff, TYPE_DIFFERENTIAL);
     if(my_rank == 0)
         differential_print(NULL, diff);
 }
@@ -123,7 +123,7 @@ int main()
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
     //example_differential_correlation();
-    //example_differential_correlation_chaskey();
+    example_differential_correlation_chaskey();
     //coutinho_2022_chacha_linear_approximations();
 
     //The following code was used to find all single bit differentials from 1.5 to 5 rounds of Chaskey
@@ -137,11 +137,11 @@ int main()
     // }
 
     //Only for x_{0,31}
-    number_of_trials<<=35;
-    while(1){
-    compute_all_single_bit_differential_correlation(ALG_TYPE_CHASKEY, 8, 3, 
-        number_of_trials, "all_single_bit_differentials_from_3_to_11_subrounds_of_chaskey_idw_0_idb_31.dat",0,31);
-    }
+    // number_of_trials<<=35;
+    // while(1){
+    // compute_all_single_bit_differential_correlation(ALG_TYPE_CHASKEY, 8, 3, 
+    //     number_of_trials, "all_single_bit_differentials_from_3_to_11_subrounds_of_chaskey_idw_0_idb_31.dat",0,31);
+    // }
 
     //The following code was used to find all single bit differentials for 4 rounds of Salsa in order to apply BLE
     // uint64_t number_of_trials = 1;
