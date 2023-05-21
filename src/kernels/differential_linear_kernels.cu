@@ -133,7 +133,7 @@ uint64_t number_of_trials, const char *out_file_name, int fixed_id_word, int fix
             cudaMemcpy(d_results, h_results, L, cudaMemcpyHostToDevice);
             seed = seed_by_rank();
 
-            differential_correlation_exhaustion_kernel <<<dim3(numblocks, 4, 32), NUMBER_OF_CUDA_THREADS>>> (seed, 
+            differential_correlation_exhaustion_kernel <<<dim3(NUMBER_OF_CUDA_BLOCKS/(4*32), 4, 32), NUMBER_OF_CUDA_THREADS>>> (seed, 
                 subrounds, last_subround, NUMBER_OF_TESTS_PER_THREAD, d_results, alg_type, fixed_id_word, fixed_id_bit);
 
             cudaMemcpy(h_results, d_results, L, cudaMemcpyDeviceToHost);
