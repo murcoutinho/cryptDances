@@ -139,8 +139,8 @@ int main()
     //Only for x_{0,31}
     number_of_trials<<=34;
     while(1){
-    compute_all_single_bit_differential_correlation(ALG_TYPE_CHASKEY, 9, 3, 
-        number_of_trials, "all_single_bit_differentials_from_3_to_12_subrounds_of_chaskey.dat",0,31);
+    compute_all_single_bit_differential_correlation(ALG_TYPE_CHASKEY, 8, 3, 
+        number_of_trials, "all_single_bit_differentials_from_3_to_11_subrounds_of_chaskey_idw_0_idb_31.dat",0,31);
     }
 
     //The following code was used to find all single bit differentials for 4 rounds of Salsa in order to apply BLE
