@@ -18,7 +18,7 @@
 #define TYPE_LINEAR 1
 
 void compute_all_single_bit_differential_correlation(int alg_type, int subrounds, int last_subround, 
-uint64_t number_of_trials, const char *out_file_name);
+uint64_t number_of_trials, const char *out_file_name, int fixed_id_word, int fixed_id_bit);
 
 void compute_differential_or_linear_correlation(diff_lin_t *diff_lin, int type);
 void search_until_find_correlation(diff_lin_t *diff_lin, int type);

@@ -128,18 +128,26 @@ int main()
 
     //The following code was used to find all single bit differentials from 1.5 to 5 rounds of Chaskey
     uint64_t number_of_trials = 1;
-    number_of_trials<<=28;
 
+    //All single bit ID
+    //number_of_trials<<=28;
+    // while(1){
+    // compute_all_single_bit_differential_correlation(ALG_TYPE_CHASKEY, 9, 3, 
+    //     number_of_trials, "all_single_bit_differentials_from_3_to_12_subrounds_of_chaskey.dat",-1,-1);
+    // }
+
+    //Only for x_{0,31}
+    number_of_trials<<=34;
     while(1){
     compute_all_single_bit_differential_correlation(ALG_TYPE_CHASKEY, 9, 3, 
-        number_of_trials, "all_single_bit_differentials_from_3_to_12_subrounds_of_chaskey.dat");
+        number_of_trials, "all_single_bit_differentials_from_3_to_12_subrounds_of_chaskey.dat",0,31);
     }
 
     //The following code was used to find all single bit differentials for 4 rounds of Salsa in order to apply BLE
     // uint64_t number_of_trials = 1;
     // number_of_trials<<=28;
     // compute_all_single_bit_differential_correlation(ALG_TYPE_SALSA, 4, 0, 
-    //     number_of_trials, "all_single_bit_differentials_for_4_rounds_of_salsa.dat");
+    //     number_of_trials, "all_single_bit_differentials_for_4_rounds_of_salsa.dat",-1,-1);
 
     MPI_Finalize();
     return 0;

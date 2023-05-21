@@ -49,7 +49,8 @@ void get_differential_from_position(int position, differential_t *diff)
  * behaviours of the constants of the algorithms.
 */
 __global__ void differential_correlation_exhaustion_kernel(unsigned long long seed, 
-int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long *d_result, int alg_type)
+int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long *d_result, int alg_type,
+int fixed_id_word, int fixed_id_bit)
 {
     uint32_t id[MAXIMUM_STATE_SIZE] = { 0 };
     algorithm alg;
@@ -59,7 +60,17 @@ int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long
     int sum[MAXIMUM_STATE_SIZE_IN_BITS] = { 0 };
     uint32_t state[MAXIMUM_STATE_SIZE] = { 0 }, alt_state[MAXIMUM_STATE_SIZE] = { 0 };
 
-    int word = blockIdx.y, bit = blockIdx.z;
+    int word, bit;
+    if(fixed_id_word<0)
+        word = blockIdx.y;
+    else
+        word = fixed_id_word;
+        
+    if(fixed_id_bit<0)
+        bit = blockIdx.z;
+    else
+        bit = fixed_id_bit;
+     
     const unsigned long long blockId = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
     const unsigned long long tid = blockId * blockDim.x + threadIdx.x;
 
@@ -87,10 +98,12 @@ int subrounds, int last_subround, int n_test_for_each_thread, unsigned long long
 
 
 void compute_all_single_bit_differential_correlation(int alg_type, int subrounds, int last_subround, 
-uint64_t number_of_trials, const char *out_file_name)
+uint64_t number_of_trials, const char *out_file_name, int fixed_id_word, int fixed_id_bit )
 {
     unsigned long long int *d_results;
     uint64_t numblocks = NUMBER_OF_CUDA_BLOCKS/(4*32);
+    if(fixed_id_word>=0) numblocks *= 4;
+    if(fixed_id_bit>=0) numblocks *= 32;
     uint64_t iterations = number_of_trials / NUMBER_OF_CUDA_THREADS / numblocks / NUMBER_OF_TESTS_PER_THREAD / (num_procs-1);
     unsigned long long int h_results[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = { 0 }, seed;
     uint64_t acc_results[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = {0}, result[MAXIMUM_NUMBER_OF_POSSIBLE_SINGLE_BIT_DIFFERENTIALS] = {0};
@@ -121,7 +134,7 @@ uint64_t number_of_trials, const char *out_file_name)
             seed = seed_by_rank();
 
             differential_correlation_exhaustion_kernel <<<dim3(numblocks, 4, 32), NUMBER_OF_CUDA_THREADS>>> (seed, 
-                subrounds, last_subround, NUMBER_OF_TESTS_PER_THREAD, d_results, alg_type);
+                subrounds, last_subround, NUMBER_OF_TESTS_PER_THREAD, d_results, alg_type, fixed_id_word, fixed_id_bit);
 
             cudaMemcpy(h_results, d_results, L, cudaMemcpyDeviceToHost);
 
