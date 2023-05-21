@@ -130,10 +130,13 @@ int main()
     uint64_t number_of_trials = 1;
     number_of_trials<<=28;
 
-    while(1){
-    compute_all_single_bit_differential_correlation(ALG_TYPE_CHASKEY, 9, 3, 
-        number_of_trials, "all_single_bit_differentials_from_3_to_12_subrounds_of_chaskey.dat");
-    }
+    compute_all_single_bit_differential_correlation(ALG_TYPE_CHASKEY, 8, 4, 
+        number_of_trials, "all_single_bit_differentials_from_4_to_12_subrounds_of_chaskey.dat");
+
+    // while(1){
+    // compute_all_single_bit_differential_correlation(ALG_TYPE_CHASKEY, 9, 3, 
+    //     number_of_trials, "all_single_bit_differentials_from_3_to_12_subrounds_of_chaskey.dat");
+    // }
 
     //The following code was used to find all single bit differentials for 4 rounds of Salsa in order to apply BLE
     // uint64_t number_of_trials = 1;
