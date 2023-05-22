@@ -193,7 +193,6 @@ int main()
     //coutinho_2022_chacha_linear_approximations();
 
     //The following code was used to find all single bit differentials from 1.5 to 5 rounds of Chaskey
-    uint64_t number_of_trials = 1;
     //The following code was used to find all single bit differentials for 4 rounds of Salsa in order to apply BLE
     uint64_t number_of_trials = 1;
     number_of_trials<<=28;
