@@ -165,9 +165,9 @@ void example_differential_correlation_chaskey5()
 {
     differential_t diff = {
             ALG_TYPE_CHASKEY,
-            {{0}, {0},{28},3, 1}, //id
-            {{0}, {0},{24},12,1}, //od
-            {"Test",0.000151, 0, 0, 0}
+            {{0}, {2,2,1},{15,8,8},3, 3}, //id
+            {{0}, {0},{20},12,1}, //od
+            {"Test",1, 0, 0, 0}
         };
 
     lob_compute_mask_from_list_of_bits(&(diff.input));
@@ -177,21 +177,6 @@ void example_differential_correlation_chaskey5()
         differential_print(NULL, diff);
 }
 
-void example_differential_correlation_chaskey6()
-{
-    differential_t diff = {
-            ALG_TYPE_CHASKEY,
-            {{0}, {2},{19},3, 1}, //id
-            {{0}, {3},{22},12,1}, //od
-            {"Test",0.000151, 0, 0, 0}
-        };
-
-    lob_compute_mask_from_list_of_bits(&(diff.input));
-    lob_compute_mask_from_list_of_bits(&(diff.output));
-    search_until_find_correlation(&diff, TYPE_DIFFERENTIAL);
-    if(my_rank == 0)
-        differential_print(NULL, diff);
-}
 
 int main()
 {
@@ -205,7 +190,6 @@ int main()
     example_differential_correlation_chaskey3();
     example_differential_correlation_chaskey4();
     example_differential_correlation_chaskey5();
-    example_differential_correlation_chaskey6();
     //coutinho_2022_chacha_linear_approximations();
 
     //The following code was used to find all single bit differentials from 1.5 to 5 rounds of Chaskey
